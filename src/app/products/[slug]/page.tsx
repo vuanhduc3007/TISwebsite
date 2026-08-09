@@ -1,114 +1,101 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProductBySlug, products } from "@/content/products";
+import { IconArrowLeft, IconTag } from "@tabler/icons-react";
+import { ProductCatalogState } from "@/components/product-catalog-state";
+import { getProductRepositoryErrorMessage, getProductBySlug } from "@/lib/products-repository";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return products.map((product) => ({ slug: product.slug }));
-}
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
-  return { title: product?.title ?? "Sản phẩm" };
+
+  try {
+    const product = await getProductBySlug(slug);
+    return { title: product?.title ?? "Sản phẩm" };
+  } catch {
+    return { title: "Sản phẩm" };
+  }
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
-  if (!product) notFound();
+  let product;
+  let errorMessage: string | null = null;
+
+  try {
+    product = await getProductBySlug(slug);
+  } catch (error) {
+    errorMessage = getProductRepositoryErrorMessage(error);
+  }
+
+  if (errorMessage) {
+    return (
+      <main>
+        <ProductCatalogState variant="error" message={errorMessage} />
+      </main>
+    );
+  }
+
+  if (!product) {
+    notFound();
+  }
 
   return (
     <main className="pb-24">
-      {/* Editorial Header Section */}
-      <section className="site-shell pt-16 md:pt-24 lg:pt-32 pb-16 md:pb-24">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start reveal">
-          
-          {/* Left: Display Title */}
+      <section className="site-shell pt-10 md:pt-16">
+        <Link className="inline-flex items-center gap-2 text-sm font-bold text-[var(--ink-muted)] transition hover:text-[var(--accent)]" href="/products">
+          <IconArrowLeft size={17} width={17} height={17} stroke={1.8} aria-hidden="true" />
+          Tất cả sản phẩm
+        </Link>
+      </section>
+
+      <section className="site-shell pt-12 md:pt-20 lg:pt-28">
+        <div className="grid items-start gap-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-24">
           <div className="lg:sticky lg:top-32">
-            <h1 className="text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold tracking-tighter leading-[1.05] text-[var(--ink)] pr-4">
-              {product.profileTitle}
+            <p className="eyebrow">{product.category.name}</p>
+            <h1 className="max-w-3xl text-4xl font-bold tracking-tighter leading-[1.05] text-[var(--ink)] md:text-5xl xl:text-6xl">
+              {product.title}
             </h1>
+            <p className="mt-6 text-lg font-semibold text-[var(--accent)]">{product.price}</p>
           </div>
-          
-          {/* Right: Refined Content */}
-          <div className="flex flex-col gap-12">
-            {/* Strengths (if any) */}
-            {product.strengths && product.strengths.length > 0 && (
-              <div>
-                {product.strengthsTitle && (
-                  <h2 className="text-base uppercase tracking-widest text-[var(--ink-muted)] mb-6 font-bold">
-                    {product.strengthsTitle}
-                  </h2>
-                )}
-                <ul className="flex flex-col border-t border-[var(--line)]">
-                  {product.strengths.map((strength, idx) => (
-                    <li 
-                      key={idx} 
-                      className="py-5 border-b border-[var(--line)] text-base md:text-lg text-[var(--ink)] leading-relaxed"
-                    >
-                      {strength}
-                    </li>
-                  ))}
-                </ul>
+
+          <div className="flex flex-col gap-10">
+            <div className="detail-hero-media min-h-[22rem] md:min-h-[30rem]">
+              <Image src={product.image} alt={product.imageAlt} fill priority sizes="(min-width: 1024px) 60vw, 100vw" className="object-contain p-8 md:p-12" />
+            </div>
+
+            <div className="grid gap-6 border-y border-[var(--line)] py-6 sm:grid-cols-2">
+              <div className="flex items-start gap-3">
+                <IconTag size={20} width={20} height={20} stroke={1.7} color="var(--accent)" aria-hidden="true" />
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--ink-muted)]">Thương hiệu</p>
+                  <p className="mt-2 font-semibold text-[var(--ink)]">{product.brand}</p>
+                </div>
               </div>
-            )}
-            
-            {/* Descriptions */}
-            <div className="space-y-6">
-              {product.description.map((paragraph, idx) => (
-                <p 
-                  key={idx} 
-                  className={`text-base md:text-lg leading-relaxed ${
-                    idx === 0 && (!product.strengths || product.strengths.length === 0) 
-                      ? "text-xl md:text-2xl font-medium tracking-tight text-[var(--ink)]" 
-                      : "text-[var(--ink-muted)]"
-                  }`}
-                >
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--ink-muted)]">Danh mục</p>
+                <p className="mt-2 font-semibold text-[var(--ink)]">{product.category.name}</p>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              {product.description.map((paragraph) => (
+                <p className="text-base leading-8 text-[var(--ink-muted)]" key={paragraph}>
                   {paragraph}
                 </p>
               ))}
             </div>
-          </div>
-          
-        </div>
-      </section>
 
-      {/* Models Grid Section */}
-      <section className="site-shell reveal">
-        <div className="border-t border-[var(--line)] pt-16 md:pt-24">
-          <div className={`grid grid-cols-2 md:grid-cols-3 ${product.models.length === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-x-6 gap-y-16 lg:gap-y-24`}>
-            {product.models.map((model, idx) => (
-              <div key={idx} className="flex flex-col items-center group">
-                
-                {/* Brand Logo (Optional) */}
-                {model.logo && (
-                  <div className="h-10 w-28 relative mb-8 opacity-80 mix-blend-multiply group-hover:opacity-100 transition-opacity duration-300">
-                    {model.logo.endsWith('.svg') ? (
-                       <img src={model.logo} alt={model.brand || "Logo"} className="w-full h-full object-contain" />
-                    ) : (
-                       <Image src={model.logo} alt={model.brand || "Logo"} fill sizes="112px" className="object-contain" />
-                    )}
-                  </div>
-                )}
-                
-                {/* Product Image */}
-                <div className={`relative w-full aspect-square mix-blend-multiply transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-3 ${!model.logo ? "mt-4" : ""}`}>
-                  <Image 
-                    src={model.image} 
-                    alt={model.brand ? `Thiết bị ${model.brand}` : "Thiết bị lưu trữ BESS"} 
-                    fill 
-                    sizes="(max-width: 768px) 50vw, 25vw" 
-                    className="object-contain drop-shadow-sm"
-                  />
-                </div>
-                
-              </div>
-            ))}
+            <Link className="button-primary w-fit" href="/contact">
+              Tư vấn sản phẩm
+            </Link>
           </div>
         </div>
       </section>

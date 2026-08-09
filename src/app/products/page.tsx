@@ -1,28 +1,44 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/page-hero";
-import { ProductCard } from "@/components/product-card";
-import { products, solarImages } from "@/content/products";
+import { ProductCatalog } from "@/components/product-catalog";
+import { ProductCatalogState } from "@/components/product-catalog-state";
+import { solarImages } from "@/content/products";
+import { getProductRepositoryErrorMessage, getProducts } from "@/lib/products-repository";
+import type { Product } from "@/lib/products-contract";
 
 export const metadata: Metadata = {
   title: "Sản phẩm"
 };
 
-export default function ProductsPage() {
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export default async function ProductsPage() {
+  let products: Product[] = [];
+  let errorMessage: string | null = null;
+
+  try {
+    products = await getProducts();
+  } catch (error) {
+    errorMessage = getProductRepositoryErrorMessage(error);
+  }
+
   return (
     <main>
       <PageHero
         title="Thiết bị điện mặt trời"
-        description="Danh mục được tổ chức theo vai trò trong hệ thống, giúp bạn bắt đầu từ đúng nhóm thiết bị cần tìm hiểu."
+        description="Danh mục sản phẩm được lấy trực tiếp từ hệ thống Solar Shop, giúp bạn tìm đúng thiết bị theo từng nhóm ứng dụng."
         image={solarImages.field}
         imageAlt="Tấm pin điện mặt trời trải rộng dưới bầu trời xanh"
       />
-      <section className="site-shell section-space pt-0">
-        <div className="grid gap-5 md:grid-cols-2">
-          {products.map((product, index) => (
-            <ProductCard product={product} priority={index === 0} key={product.slug} />
-          ))}
-        </div>
-      </section>
+
+      {errorMessage ? (
+        <ProductCatalogState variant="error" message={errorMessage} />
+      ) : products.length === 0 ? (
+        <ProductCatalogState variant="empty" message="Hiện chưa có sản phẩm nào trong cơ sở dữ liệu." />
+      ) : (
+        <ProductCatalog products={products} />
+      )}
     </main>
   );
 }

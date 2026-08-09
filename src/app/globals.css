@@ -401,9 +401,30 @@ h2 {
 
 .product-image-wrap {
   position: relative;
-  min-height: 15rem;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
   overflow: hidden;
   background: var(--surface-muted);
+}
+
+.product-card-title {
+  display: -webkit-box;
+  min-height: 2.8rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.4;
+}
+
+.product-card-description {
+  min-height: 2.35rem;
+  margin-top: 0.6rem;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .project-panel {
