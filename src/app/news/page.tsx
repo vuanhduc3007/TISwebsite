@@ -1,54 +1,129 @@
 import type { Metadata } from "next";
-import { PageHero } from "@/components/page-hero";
+import Link from "next/link";
+import { IconArrowUpRight, IconListCheck, IconSun, IconWifi } from "@tabler/icons-react";
+import { AboutBlueprintHero } from "@/components/about-blueprint-hero";
+import { SupportTopicCard } from "@/components/support-topic-card";
+import { company } from "@/content/company";
+import { supportTopics, type SupportCategory, type SupportTopic } from "@/content/support";
 
 export const metadata: Metadata = {
-  title: "Tin tức"
+  title: "Hỗ trợ kỹ thuật",
+  description: "Hướng dẫn thực tế cho hệ thống năng lượng mặt trời và mạng Wi-Fi từ TIS."
 };
 
-const articles = [
-  {
-    title: "Hệ thống mạng và an ninh cho tòa nhà - bắt đầu từ đâu?",
-    body: "Trước khi lựa chọn thiết bị, cần hiểu rõ quy mô tòa nhà, số lượng người dùng và yêu cầu bảo mật để có phương án phù hợp."
+const categoryContent: Record<SupportCategory, {
+  eyebrow: string;
+  title: string;
+  description: string;
+}> = {
+  solar: {
+    eyebrow: "01 / Năng lượng",
+    title: "Giữ hệ thống mặt trời vận hành đúng bài toán",
+    description: "Từ bước chuẩn bị khảo sát đến kiểm tra inverter và sản lượng, bắt đầu bằng những dấu hiệu dễ quan sát nhất."
   },
-  {
-    title: "Chuyển đổi số cho cơ quan hành chính",
-    body: "Trang bị một cửa điện tử và hệ thống CNTT cho cấp xã, huyện đòi hỏi khảo sát thực tế và kế hoạch triển khai theo từng giai đoạn."
-  },
-  {
-    title: "Hệ thống HVAC cần những yếu tố nào để vận hành hiệu quả?",
-    body: "Thiết kế hệ thống điều hòa phù hợp bắt đầu từ diện tích, công năng sử dụng và điều kiện khí hậu của công trình."
-  },
-  {
-    title: "Tư vấn công trình điện - những điều cần biết",
-    body: "Thi công hệ thống điện cần tuân thủ tiêu chuẩn an toàn và phù hợp với công suất sử dụng thực tế của công trình."
-  },
-  {
-    title: "Trước khi lắp điện mặt trời mái nhà, nên chuẩn bị gì?",
-    body: "Bắt đầu từ hiện trạng mái, thói quen sử dụng điện và khu vực dự kiến đặt thiết bị để buổi tư vấn có cơ sở hơn."
-  },
-  {
-    title: "Khi nào nên tìm hiểu thêm giải pháp lưu trữ?",
-    body: "Nhu cầu chủ động nguồn điện và các tải cần ưu tiên là điểm khởi đầu để trao đổi về hệ hybrid."
+  wifi: {
+    eyebrow: "02 / Kết nối",
+    title: "Mạng Wi-Fi ổn định bắt đầu từ cấu hình đúng",
+    description: "Khoanh vùng vùng phủ sóng, thiết bị và bảo mật trước khi thay mới phần cứng hoặc mở rộng hệ thống."
   }
-];
+};
 
-export default function NewsPage() {
+const solarTopics = supportTopics.filter((topic) => topic.category === "solar");
+const wifiTopics = supportTopics.filter((topic) => topic.category === "wifi");
+
+function SupportCategorySection({ category, topics }: { category: SupportCategory; topics: readonly SupportTopic[] }) {
+  const content = categoryContent[category];
+  const Icon = category === "solar" ? IconSun : IconWifi;
+
+  return (
+    <section id={`${category}-support`} className="site-shell section-space scroll-mt-24 pt-0" aria-labelledby={`${category}-heading`}>
+      <div className="mb-10 grid gap-6 border-t border-[var(--line)] pt-6 lg:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)] lg:items-end">
+        <div>
+          <p className="eyebrow mb-3">{content.eyebrow}</p>
+          <div className="flex items-center gap-3">
+            <Icon className="h-6 w-6 shrink-0 text-[var(--accent)]" stroke={1.7} aria-hidden="true" />
+            <h2 id={`${category}-heading`}>{content.title}</h2>
+          </div>
+        </div>
+        <p className="max-w-2xl text-base leading-7 text-[var(--ink-muted)]">{content.description}</p>
+      </div>
+      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {topics.map((topic) => (
+          <SupportTopicCard key={topic.id} topic={topic} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export default function TechnicalSupportPage() {
   return (
     <main>
-      <PageHero
-        title="Kiến thức ngành"
-        description="Những nội dung cơ bản về CNTT, cơ điện và năng lượng tái tạo giúp bạn bắt đầu cuộc trao đổi với TIS bằng thông tin rõ ràng hơn."
-        image="/images/projects/electrical-panel-installation.jpg"
-        imageAlt="Kỹ thuật viên làm việc với tủ điện"
+      <AboutBlueprintHero
+        title="Trung tâm hỗ trợ kỹ thuật"
+        description="Hướng dẫn thực tế, checklist bảo trì và cách khoanh vùng sự cố cho hệ thống điện mặt trời và mạng Wi-Fi."
+        eyebrow="// Trung tâm hỗ trợ"
+        titleId="support-blueprint-title"
+        metricsIntro="Bản đồ hỗ trợ"
+        signature="TIS / SUPPORT DESK"
+        metrics={[
+          { label: "Nhóm giải pháp", value: "02", detail: "Điện mặt trời · Mạng Wi-Fi", offset: "none" },
+          { label: "Chủ đề hướng dẫn", value: String(supportTopics.length).padStart(2, "0"), detail: "Checklist theo từng triệu chứng", offset: "small" },
+          { label: "Kết nối trực tiếp", value: "01", detail: `Hotline ${company.hotline}`, offset: "large" }
+        ]}
       />
-      <section className="site-shell section-space pt-0">
-        <div className="article-list">
-          {articles.map((article) => (
-            <article className="reveal" key={article.title}>
-              <h2>{article.title}</h2>
-              <p>{article.body}</p>
-            </article>
-          ))}
+
+      <section className="site-shell pb-20 pt-0" aria-labelledby="support-orientation-heading">
+        <div className="grid gap-8 border-t border-[var(--line)] pt-6 lg:grid-cols-[minmax(0,.75fr)_minmax(0,1.25fr)] lg:items-end">
+          <div>
+            <p className="eyebrow mb-3">Trung tâm hỗ trợ</p>
+            <h2 id="support-orientation-heading" className="max-w-xl">Bắt đầu từ triệu chứng, xử lý theo từng bước.</h2>
+            <p className="mt-4 max-w-xl text-[var(--ink-muted)] leading-7">
+              Chọn nhóm vấn đề để xem checklist phù hợp trước khi liên hệ kỹ thuật. Các hướng dẫn giúp bạn thu thập đúng thông tin, không thay thế quy trình an toàn tại công trình.
+            </p>
+          </div>
+          <nav className="grid gap-3 sm:grid-cols-2" aria-label="Chọn nhóm hỗ trợ">
+            <Link className="group flex items-center justify-between gap-4 rounded-[16px] border border-[var(--line)] bg-[var(--surface)] p-5 transition hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[var(--shadow)]" href="#solar-support">
+              <span>
+                <span className="block text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--accent)]">01</span>
+                <span className="mt-2 block text-lg font-extrabold tracking-[-0.04em]">Điện mặt trời</span>
+              </span>
+              <IconSun className="h-6 w-6 shrink-0 text-[var(--accent)] transition-transform group-hover:rotate-12" stroke={1.7} aria-hidden="true" />
+            </Link>
+            <Link className="group flex items-center justify-between gap-4 rounded-[16px] border border-[var(--line)] bg-[var(--surface)] p-5 transition hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[var(--shadow)]" href="#wifi-support">
+              <span>
+                <span className="block text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--accent)]">02</span>
+                <span className="mt-2 block text-lg font-extrabold tracking-[-0.04em]">Mạng Wi-Fi</span>
+              </span>
+              <IconWifi className="h-6 w-6 shrink-0 text-[var(--accent)] transition-transform group-hover:rotate-12" stroke={1.7} aria-hidden="true" />
+            </Link>
+          </nav>
+        </div>
+      </section>
+
+      <SupportCategorySection category="solar" topics={solarTopics} />
+      <SupportCategorySection category="wifi" topics={wifiTopics} />
+
+      <section className="site-shell section-space pt-0" aria-labelledby="support-escalation-heading">
+        <div className="project-panel reveal grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div>
+            <p className="eyebrow mb-3 text-black/70">Chưa tìm thấy vấn đề?</p>
+            <div className="flex items-start gap-3">
+              <IconListCheck className="mt-1 h-7 w-7 shrink-0 text-black" stroke={1.7} aria-hidden="true" />
+              <div>
+                <h2 id="support-escalation-heading">Cần hỗ trợ trực tiếp từ kỹ sư TIS?</h2>
+                <p className="max-w-2xl text-black/70">Gửi thông tin công trình hoặc gọi hotline để đội ngũ kỹ thuật cùng bạn xác định nguyên nhân và hướng xử lý phù hợp.</p>
+              </div>
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-[auto_auto] sm:items-center">
+            <Link className="button-secondary border-black/30 text-black hover:border-black hover:bg-black/10" href="/contact">
+              Gửi yêu cầu hỗ trợ <IconArrowUpRight className="ml-2 h-4 w-4" stroke={2} aria-hidden="true" />
+            </Link>
+            <a className="text-center text-sm font-extrabold text-black underline decoration-black/30 underline-offset-4 hover:decoration-black" href={`tel:${company.hotline.replace(/\s+/g, "")}`}>
+              {company.hotline}
+            </a>
+          </div>
         </div>
       </section>
     </main>

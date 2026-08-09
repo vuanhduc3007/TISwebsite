@@ -81,6 +81,9 @@ export const partnerLogos = [
   { name: "Deye", src: "/images/partners/deye.png" },
   { name: "CyberPower", src: "/images/partners/cyberpower.png" },
   { name: "Jinko Solar", src: "/images/partners/jinkosolar.png" },
+  { name: "EVE", src: "/images/partners/eve.svg" },
+  { name: "Fronius", src: "/images/partners/fronius.svg" },
+  { name: "SMA", src: "/images/partners/sma.svg" },
   { name: "LuxPower", src: "/images/partners/luxpower.png" },
   { name: "GCL", src: "/images/partners/gcl.png" }
 ];

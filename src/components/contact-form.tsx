@@ -31,8 +31,8 @@ export function ContactForm() {
         <textarea id="need" name="need" rows={5} aria-describedby="need-help" />
         <p id="need-help" className="form-help">Ví dụ: loại mái, quy mô công trình hoặc thiết bị cần tìm hiểu.</p>
       </div>
-      {state === "error" && <p className="form-message form-error">Vui lòng hoàn tất họ tên, số điện thoại và nhu cầu trước khi gửi.</p>}
-      {state === "ready" && <p className="form-message form-ready">Thông tin đã sẵn sàng để gửi. Kết nối biểu mẫu này với CRM hoặc hộp thư trước khi xuất bản.</p>}
+      {state === "error" && <p className="form-message form-error" role="alert">Vui lòng hoàn tất họ tên, số điện thoại và nhu cầu trước khi gửi.</p>}
+      {state === "ready" && <p className="form-message form-ready" role="status" aria-live="polite">Thông tin đã sẵn sàng để gửi. Kết nối biểu mẫu này với CRM hoặc hộp thư trước khi xuất bản.</p>}
       <button className="button-primary" type="submit">Gửi yêu cầu</button>
     </form>
   );

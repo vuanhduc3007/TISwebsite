@@ -1,0 +1,252 @@
+.hero {
+  --about-hero-bg: #0b6f9f;
+  --about-hero-sky: #4db8df;
+  --about-hero-grid: rgba(4, 42, 67, 0.34);
+  --about-hero-grid-soft: rgba(4, 42, 67, 0.16);
+  --about-hero-ink: #ffffff;
+  --about-hero-muted: #e5f4fb;
+  --about-grid-size: 80px;
+  --about-rule-width: 48px;
+  --about-rule-height: 4px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: var(--about-hero-bg);
+  background-image:
+    linear-gradient(to right, var(--about-hero-grid-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--about-hero-grid-soft) 1px, transparent 1px),
+    radial-gradient(circle at 12% 84%, rgba(253, 200, 0, 0.12), transparent 28%),
+    linear-gradient(108deg, rgba(3, 24, 40, 0.8) 0%, rgba(8, 81, 115, 0.46) 52%, rgba(77, 184, 223, 0.1) 100%),
+    linear-gradient(108deg, #0a4367 0%, var(--about-hero-bg) 48%, var(--about-hero-sky) 100%);
+  background-size: var(--about-grid-size) var(--about-grid-size), var(--about-grid-size) var(--about-grid-size), auto, auto, auto;
+  color: var(--about-hero-ink);
+}
+
+.hero::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-block: 1px solid var(--about-hero-grid);
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.5px), var(--about-hero-grid) 50%, transparent calc(50% + 0.5px)),
+    linear-gradient(0deg, transparent calc(75% - 0.5px), var(--about-hero-grid) 75%, transparent calc(75% + 0.5px));
+  content: "";
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.hero::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  z-index: 3;
+  height: 30px;
+  background: var(--canvas);
+  clip-path: polygon(0 100%, 0 62%, 10% 62%, 10% 28%, 20% 28%, 20% 0, 80% 0, 80% 28%, 90% 28%, 90% 62%, 100% 62%, 100% 100%);
+  content: "";
+  pointer-events: none;
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-height: min(48rem, calc(100dvh - 72px));
+  align-items: center;
+  gap: clamp(3rem, 8vw, 8rem);
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+  padding-block: clamp(4rem, 8vw, 7rem) 4rem;
+}
+
+.copy {
+  max-width: 52rem;
+}
+
+.eyebrow,
+.metricsIntro,
+.metricLabel,
+.signature {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  margin-bottom: 1.4rem;
+  color: var(--accent);
+  font-size: 0.93rem;
+}
+
+.title {
+  max-width: none;
+  color: var(--about-hero-ink);
+  font-size: clamp(3.25rem, 4.8vw, 5.25rem);
+  font-weight: 800;
+  letter-spacing: -0.09em;
+  line-height: 0.86;
+}
+
+.rule {
+  display: block;
+  width: var(--about-rule-width);
+  height: var(--about-rule-height);
+  margin-top: clamp(2rem, 4vw, 3rem);
+  background: var(--accent);
+}
+
+.description {
+  max-width: 45ch;
+  margin-top: 1.6rem;
+  color: var(--about-hero-muted);
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  line-height: 1.8;
+}
+
+.signature {
+  margin-top: 2.5rem;
+  color: color-mix(in srgb, var(--about-hero-muted) 72%, transparent);
+}
+
+.metricsPanel {
+  align-self: end;
+  padding-bottom: 2rem;
+}
+
+.metricsIntro {
+  margin-bottom: 1.1rem;
+  color: var(--about-hero-muted);
+}
+
+.metrics {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem 1rem;
+  border-top: 1px solid var(--about-hero-grid);
+  padding: 1.35rem 0 1.25rem;
+  transition: border-color 180ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.metric:last-child {
+  border-bottom: 1px solid var(--about-hero-grid);
+}
+
+.metric[data-offset="small"] {
+  transform: translateX(1.5rem);
+}
+
+.metric[data-offset="large"] {
+  transform: translateX(-1rem);
+}
+
+.metric:hover {
+  border-color: var(--accent);
+  transform: translateX(0.4rem);
+}
+
+.metricLabel {
+  grid-column: 1 / -1;
+  color: var(--about-hero-muted);
+}
+
+.metricValue {
+  color: var(--accent);
+  font-size: clamp(2.6rem, 5vw, 4.7rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: -0.08em;
+  line-height: 0.9;
+}
+
+.metricDetail {
+  align-self: end;
+  max-width: 9rem;
+  padding-bottom: 0.2rem;
+  color: var(--about-hero-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.marker {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  place-items: center;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.markerTop {
+  top: 2rem;
+  right: 3rem;
+}
+
+.markerBottom {
+  bottom: 4rem;
+  left: 3rem;
+}
+
+@media (max-width: 767px) {
+  .hero {
+    --about-grid-size: 40px;
+  }
+
+  .shell {
+    min-height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3.5rem;
+    padding-block: 4.5rem 4rem;
+  }
+
+  .title {
+    font-size: clamp(3rem, 13vw, 4.5rem);
+  }
+
+  .description {
+    max-width: 34ch;
+  }
+
+  .metricsPanel {
+    padding-bottom: 1.5rem;
+  }
+
+  .metric[data-offset="small"],
+  .metric[data-offset="large"] {
+    transform: none;
+  }
+
+  .metric:hover {
+    transform: translateX(0.2rem);
+  }
+
+  .markerTop {
+    top: 1.25rem;
+    right: 1.25rem;
+  }
+
+  .markerBottom {
+    bottom: 3.75rem;
+    left: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metric {
+    transition: none;
+  }
+}

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { PageHero } from "@/components/page-hero";
+import { AboutBlueprintHero } from "@/components/about-blueprint-hero";
+import styles from "./about.module.css";
 import { company, vision, mission, coreValues, workforce, pillars, serviceLines } from "@/content/company";
-import { IconBulb, IconDiamond, IconHeartHandshake, IconHeart } from "@tabler/icons-react";
+import { IconBulb, IconDiamond, IconEye, IconHeartHandshake, IconHeart, IconTarget } from "@tabler/icons-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -19,16 +20,19 @@ const valueIcons = {
 export default function AboutPage() {
   return (
     <main>
-      <PageHero
+      <AboutBlueprintHero
         title="Về TIS"
         description="TIS hoạt động từ năm 2013 trong lĩnh vực CNTT, cơ điện và năng lượng tái tạo. Chúng tôi tư vấn, thiết kế và thi công giải pháp phù hợp với từng công trình."
-        image="/images/projects/rooftop-panorama-worker.jpg"
-        imageAlt="Đội ngũ TIS thi công trên mái công trình"
+        metrics={[
+          { label: "Năm thành lập", value: company.established.slice(-4), detail: "Nền tảng đồng hành lâu dài", offset: "none" },
+          { label: "Lĩnh vực cốt lõi", value: String(pillars.length).padStart(2, "0"), detail: "CNTT · Cơ điện · Năng lượng", offset: "small" },
+          { label: "Nhân sự chuyên môn", value: `${workforce.total}+`, detail: "Kỹ sư và kỹ thuật viên", offset: "large" }
+        ]}
       />
 
       {/* 2. Company Overview */}
       <section className="site-shell section-space pt-0 grid gap-5 lg:grid-cols-2">
-        <article className="content-panel reveal">
+        <article className={`content-panel reveal ${styles.overviewPanel}`}>
           <h2>Thông tin doanh nghiệp</h2>
           <dl className="mt-5 grid gap-4 text-sm">
             <div className="grid grid-cols-[8rem_1fr] gap-2">
@@ -91,11 +95,17 @@ export default function AboutPage() {
       {/* 3. Vision & Mission */}
       <section className="site-shell section-space pt-0 grid gap-5 lg:grid-cols-2">
         <article className="content-panel reveal">
-          <h2>Tầm nhìn</h2>
+          <div className="flex items-center gap-3">
+            <h2>Tầm nhìn</h2>
+            <IconEye className="h-6 w-6 text-[var(--accent)]" stroke={1.7} aria-hidden="true" />
+          </div>
           <p className="mt-4 leading-relaxed">{vision}</p>
         </article>
         <article className="content-panel reveal">
-          <h2>Sứ mệnh</h2>
+          <div className="flex items-center gap-3">
+            <h2>Sứ mệnh</h2>
+            <IconTarget className="h-6 w-6 text-[var(--accent)]" stroke={1.7} aria-hidden="true" />
+          </div>
           <p className="mt-4 leading-relaxed">{mission}</p>
         </article>
       </section>

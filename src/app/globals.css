@@ -7,14 +7,15 @@
   --ink: #183153;
   --ink-muted: #4a5a73;
   --line: #e2e8f0;
-  --accent: #FF7A00;
-  --accent-strong: #e06a00;
-  --button: #FF7A00;
-  --button-hover: #e06a00;
-  --accent-soft: #fff0e0;
-  --focus: #FFC107;
+  --accent: #fdc800;
+  --accent-strong: #e5b400;
+  --button: #fdc800;
+  --button-hover: #e5b400;
+  --accent-soft: #fffdf0;
+  --focus: #fdc800;
   --error: #dc2626;
   --shadow: 0 20px 50px rgba(24, 49, 83, 0.08);
+  --home-section-height: clamp(32rem, 50vh, 34rem);
 }
 
 
@@ -26,14 +27,15 @@ html[data-theme="dark"] {
   --ink: #f1f5f9;
   --ink-muted: #94a3b8;
   --line: #253447;
-  --accent: #FFC107;
+  --accent: #fdc800;
   --accent-strong: #ffcd33;
-  --button: #FF7A00;
-  --button-hover: #ff8f29;
-  --accent-soft: #302011;
-  --focus: #FFC107;
+  --button: #fdc800;
+  --button-hover: #ffcd33;
+  --accent-soft: #332800;
+  --focus: #fdc800;
   --error: #f87171;
   --shadow: 0 20px 50px rgba(0, 0, 0, 0.24);
+  --home-section-height: clamp(32rem, 50vh, 34rem);
 }
 
 html[data-theme="light"] {
@@ -43,14 +45,15 @@ html[data-theme="light"] {
   --ink: #183153;
   --ink-muted: #4a5a73;
   --line: #e2e8f0;
-  --accent: #FF7A00;
-  --accent-strong: #e06a00;
-  --button: #FF7A00;
-  --button-hover: #e06a00;
-  --accent-soft: #fff0e0;
-  --focus: #FFC107;
+  --accent: #fdc800;
+  --accent-strong: #e5b400;
+  --button: #fdc800;
+  --button-hover: #e5b400;
+  --accent-soft: #fffdf0;
+  --focus: #fdc800;
   --error: #dc2626;
   --shadow: 0 20px 50px rgba(24, 49, 83, 0.08);
+  --home-section-height: clamp(32rem, 50vh, 34rem);
 }
 
 * {
@@ -98,13 +101,20 @@ summary:focus-visible {
   margin-inline: auto;
 }
 
+.home-section {
+  height: var(--home-section-height);
+}
+
 .site-header {
   position: sticky;
   top: 0;
   z-index: 20;
   border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--canvas) 92%, transparent);
-  backdrop-filter: blur(18px);
+  background: var(--surface);
+}
+
+.site-footer {
+  background: var(--surface);
 }
 
 .brand {
@@ -142,6 +152,10 @@ summary:focus-visible {
 .nav-link:hover,
 .footer-link:hover {
   color: var(--accent);
+}
+
+.footer-link {
+  font-size: 0.9rem;
 }
 
 .button-primary,
@@ -267,14 +281,14 @@ p {
 
 h1 {
   max-width: 15ch;
-  font-size: clamp(2.4rem, 4.5vw, 4.2rem);
+  font-size: clamp(2.35rem, 4.2vw, 3.9rem);
   font-weight: 800;
   letter-spacing: -0.072em;
   line-height: 0.98;
 }
 
 h2 {
-  font-size: clamp(1.75rem, 2.8vw, 2.8rem);
+  font-size: clamp(1.7rem, 2.5vw, 2.5rem);
   font-weight: 800;
   letter-spacing: -0.058em;
   line-height: 1.02;
@@ -395,7 +409,7 @@ h2 {
 .project-panel {
   border-radius: 20px;
   background: var(--button);
-  color: #f8fafc;
+  color: #050505;
   padding: clamp(1.5rem, 3.5vw, 3rem);
 }
 
@@ -405,22 +419,26 @@ h2 {
   color: inherit;
 }
 
+.project-panel .eyebrow {
+  color: color-mix(in srgb, #050505 68%, transparent);
+}
+
 .project-panel p {
   margin-top: 1rem;
   max-width: 31rem;
-  color: color-mix(in srgb, #f8fafc 82%, transparent);
+  color: color-mix(in srgb, #050505 70%, transparent);
   line-height: 1.75;
 }
 
 .project-panel .button-secondary {
   margin-top: 1.75rem;
-  border-color: color-mix(in srgb, #f8fafc 48%, transparent);
-  color: #f8fafc;
+  border-color: color-mix(in srgb, #050505 38%, transparent);
+  color: #050505;
 }
 
 .project-panel .button-secondary:hover {
-  border-color: #f8fafc;
-  background: color-mix(in srgb, #f8fafc 12%, transparent);
+  border-color: #050505;
+  background: color-mix(in srgb, #050505 10%, transparent);
 }
 
 .contact-band {
@@ -629,6 +647,13 @@ h2 {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 1ms !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .home-section {
+    height: auto;
+    min-height: var(--home-section-height);
   }
 }
 

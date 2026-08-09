@@ -4,16 +4,16 @@ import { navigation } from "@/content/site";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-[var(--line)] py-10">
+    <footer className="site-footer border-t border-[var(--line)] flex flex-col justify-center py-12">
       <div className="site-shell grid gap-8 md:grid-cols-[1.35fr_.65fr] md:items-start">
         <div>
           <Link className="brand" href="/" aria-label="TIS - Trang chủ">
-            <Image src="/brand/tis-logo-horizontal.png" alt="TIS" width={100} height={36} />
+            <Image src="/brand/tis-logo-horizontal.png" alt="TIS" width={140} height={65} className="w-auto h-16 object-contain" />
           </Link>
-          <p className="mt-4 max-w-md text-sm leading-6 text-[var(--ink-muted)]">
+          <p className="mt-4 max-w-md text-base leading-6 text-[var(--ink-muted)]">
             Công Ty Cổ Phần Thương Mại Và Dịch Vụ Tin Học Viễn Thông TIS
           </p>
-          <div className="mt-3 grid gap-1 text-sm text-[var(--ink-muted)]">
+          <div className="mt-3 grid gap-1 text-base text-[var(--ink-muted)]">
             <p>Số 22, ngõ 318/80, phố Ngọc Trì, phường Long Biên, Hà Nội</p>
             <p>
               <a href="tel:0988761315" className="hover:text-[var(--accent)] transition-colors">0988 761 315</a>
@@ -32,7 +32,7 @@ export function SiteFooter() {
           ))}
         </nav>
       </div>
-      <div className="site-shell mt-8 text-xs text-[var(--ink-muted)]">© {new Date().getFullYear()} TIS. MST 0106229287. Chất lượng - Uy tín - Hiệu quả.</div>
+      <div className="site-shell mt-8 text-sm text-[var(--ink-muted)]">© {new Date().getFullYear()} TIS. MST 0106229287. Chất lượng - Uy tín - Hiệu quả.</div>
     </footer>
   );
 }

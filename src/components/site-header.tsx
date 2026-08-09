@@ -8,12 +8,12 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="site-shell flex h-[72px] items-center justify-between gap-4">
         <Link className="brand" href="/" aria-label="TIS - Trang chủ">
-          <Image src="/brand/tis-logo-horizontal.png" alt="TIS" width={100} height={36} priority />
+          <Image src="/brand/tis-logo-horizontal.png" alt="TIS" width={140} height={65} className="w-auto h-12 lg:h-16 object-contain" priority />
         </Link>
 
-        <nav className="hidden items-center gap-5 lg:flex" aria-label="Điều hướng chính">
+        <nav className="hidden items-center gap-10 lg:flex" aria-label="Điều hướng chính">
           {navigation.map((item) => (
-            <Link className="nav-link" href={item.href} key={item.href}>
+            <Link className="nav-link font-medium hover:text-[var(--accent)] transition-colors" href={item.href} key={item.href}>
               {item.label}
             </Link>
           ))}

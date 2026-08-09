@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" width="200" height="80">
+  <text x="100" y="52" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold" text-anchor="middle">
+    <tspan fill="#000000">solar</tspan>
+    <tspan fill="#CC0000">edge</tspan>
+  </text>
+</svg>

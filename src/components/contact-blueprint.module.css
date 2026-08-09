@@ -1,0 +1,350 @@
+.hero {
+  --contact-hero-bg: #0b6f9f;
+  --contact-hero-sky: #4db8df;
+  --contact-grid: rgba(4, 42, 67, 0.34);
+  --contact-grid-soft: rgba(4, 42, 67, 0.16);
+  --contact-hero-ink: #ffffff;
+  --contact-hero-muted: #e5f4fb;
+  --contact-field-bg: rgba(4, 42, 67, 0.2);
+  --contact-error: #ffb4b4;
+  --contact-grid-size: 80px;
+  --contact-rule-width: 48px;
+  --contact-rule-height: 4px;
+  --contact-radius: 16px;
+  position: relative;
+  isolation: isolate;
+  min-height: min(62rem, calc(100dvh - 72px));
+  overflow: hidden;
+  background-color: var(--contact-hero-bg);
+  background-image:
+    linear-gradient(to right, var(--contact-grid-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--contact-grid-soft) 1px, transparent 1px),
+    radial-gradient(circle at 12% 84%, rgba(253, 200, 0, 0.12), transparent 28%),
+    linear-gradient(108deg, rgba(3, 24, 40, 0.8) 0%, rgba(8, 81, 115, 0.46) 52%, rgba(77, 184, 223, 0.1) 100%),
+    linear-gradient(108deg, #0a4367 0%, var(--contact-hero-bg) 48%, var(--contact-hero-sky) 100%);
+  background-size: var(--contact-grid-size) var(--contact-grid-size), var(--contact-grid-size) var(--contact-grid-size), auto, auto, auto;
+  color: var(--contact-hero-ink);
+}
+
+.hero::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-block: 1px solid var(--contact-grid);
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.5px), var(--contact-grid) 50%, transparent calc(50% + 0.5px)),
+    linear-gradient(0deg, transparent calc(72% - 0.5px), var(--contact-grid) 72%, transparent calc(72% + 0.5px));
+  content: "";
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.hero::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  z-index: 3;
+  height: 30px;
+  background: var(--canvas);
+  clip-path: polygon(0 100%, 0 62%, 10% 62%, 10% 28%, 20% 28%, 20% 0, 80% 0, 80% 28%, 90% 28%, 90% 62%, 100% 62%, 100% 100%);
+  content: "";
+  pointer-events: none;
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-height: inherit;
+  align-items: center;
+  gap: clamp(3rem, 8vw, 8rem);
+  grid-template-columns: minmax(0, 1.35fr) minmax(22rem, 0.65fr);
+  padding-block: clamp(4rem, 8vw, 7rem) 4rem;
+}
+
+.copy {
+  max-width: 52rem;
+}
+
+.eyebrow,
+.formEyebrow,
+.formIndex,
+.metricLabel,
+.motto {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  margin-bottom: 1.4rem;
+  color: var(--accent);
+}
+
+.title {
+  max-width: none;
+  color: var(--contact-hero-ink);
+  font-size: clamp(3.25rem, 4.8vw, 5.25rem);
+  font-weight: 800;
+  letter-spacing: -0.09em;
+  line-height: 0.86;
+}
+
+.rule {
+  display: block;
+  width: var(--contact-rule-width);
+  height: var(--contact-rule-height);
+  margin-top: clamp(2rem, 4vw, 3rem);
+  background: var(--accent);
+}
+
+.description {
+  max-width: 45ch;
+  margin-top: 1.6rem;
+  color: var(--contact-hero-muted);
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  line-height: 1.8;
+}
+
+.legalName {
+  max-width: 45ch;
+  margin-top: 2.25rem;
+  color: var(--contact-hero-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.motto {
+  margin-top: 0.6rem;
+  color: color-mix(in srgb, var(--contact-hero-muted) 72%, transparent);
+}
+
+.metrics {
+  display: grid;
+  max-width: 48rem;
+  gap: 0;
+  margin: 2.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem 1rem;
+  border-top: 1px solid var(--contact-grid);
+  padding: 1.2rem 0 1.1rem;
+  transition: border-color 180ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.metric:last-child {
+  border-bottom: 1px solid var(--contact-grid);
+}
+
+.metric[data-offset="small"] {
+  transform: translateX(1.5rem);
+}
+
+.metric[data-offset="large"] {
+  transform: translateX(-1rem);
+}
+
+.metric:hover {
+  border-color: var(--accent);
+  transform: translateX(0.4rem);
+}
+
+.metricLabel {
+  grid-column: 1 / -1;
+  color: var(--contact-hero-muted);
+}
+
+.metricValue {
+  min-width: 0;
+  align-self: center;
+  color: var(--contact-hero-ink);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  font-weight: 800;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.metricValue:hover {
+  color: var(--accent);
+}
+
+.metricIcon {
+  align-self: center;
+  color: var(--accent);
+}
+
+.formPanel {
+  align-self: center;
+  border: 1px solid var(--contact-grid);
+  border-radius: var(--contact-radius);
+  background: rgba(3, 24, 40, 0.38);
+  box-shadow: 0 24px 80px rgba(3, 24, 40, 0.24);
+  padding: clamp(1.35rem, 3vw, 2.15rem);
+}
+
+.formHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--contact-grid);
+  padding-bottom: 1rem;
+}
+
+.formEyebrow,
+.formIndex {
+  color: var(--accent);
+}
+
+.formIndex {
+  color: var(--contact-hero-muted);
+}
+
+.formTitle {
+  max-width: 12ch;
+  margin-top: 1.5rem;
+  color: var(--contact-hero-ink);
+  font-size: clamp(1.65rem, 2.6vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.formDescription {
+  margin-top: 0.9rem;
+  color: var(--contact-hero-muted);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.formPanel :global(.contact-form) {
+  display: grid;
+  gap: 1.15rem;
+  margin-top: 1.8rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.formPanel :global(.form-row) {
+  gap: 0.5rem;
+}
+
+.formPanel :global(.form-row label) {
+  color: var(--contact-hero-ink);
+}
+
+.formPanel :global(.form-row input),
+.formPanel :global(.form-row textarea) {
+  border-color: var(--contact-grid);
+  border-radius: 10px;
+  background: var(--contact-field-bg);
+  color: var(--contact-hero-ink);
+}
+
+.formPanel :global(.form-row input:focus),
+.formPanel :global(.form-row textarea:focus) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.formPanel :global(.form-help),
+.formPanel :global(.form-message) {
+  color: var(--contact-hero-muted);
+}
+
+.formPanel :global(.form-error) {
+  color: var(--contact-error);
+}
+
+.formPanel :global(.form-ready) {
+  color: var(--accent);
+}
+
+.formPanel :global(.contact-form .button-primary) {
+  width: 100%;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #050505;
+}
+
+.formPanel :global(.contact-form .button-primary:hover) {
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+}
+
+.marker {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  place-items: center;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.markerTop {
+  top: 2rem;
+  right: 3rem;
+}
+
+
+@media (max-width: 767px) {
+  .hero {
+    --contact-grid-size: 40px;
+    min-height: auto;
+  }
+
+  .shell {
+    min-height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3.5rem;
+    padding-block: 4.5rem 4rem;
+  }
+
+  .title {
+    font-size: clamp(3rem, 13vw, 4.5rem);
+  }
+
+  .description {
+    max-width: 34ch;
+  }
+
+  .metric[data-offset="small"],
+  .metric[data-offset="large"] {
+    transform: none;
+  }
+
+  .metric:hover {
+    transform: translateX(0.2rem);
+  }
+
+  .formPanel {
+    width: 100%;
+  }
+
+  .markerTop {
+    top: 1.25rem;
+    right: 1.25rem;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metric {
+    transition: none;
+  }
+}

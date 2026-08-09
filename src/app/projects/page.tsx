@@ -16,7 +16,7 @@ export default function ProjectsPage() {
       <PageHero
         title="Công trình cùng TIS"
         description="Từ hệ thống CNTT cho cơ quan nhà nước đến điện mặt trời mái nhà cho doanh nghiệp, TIS đã thực hiện nhiều dự án trên cả nước."
-        image="/images/projects/cho-kim-tan-rooftop-aerial-installer.jpg"
+        image="/images/projects/cho-nga-tu-dau-rooftop-aerial-01.jpg"
         imageAlt="Thi công điện mặt trời trên mái công trình"
       />
       
