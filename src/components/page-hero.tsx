@@ -1,4 +1,5 @@
 import Image from "next/image";
+import styles from "./page-hero.module.css";
 
 type PageHeroProps = {
   title: string;
@@ -9,13 +10,15 @@ type PageHeroProps = {
 
 export function PageHero({ title, description, image, imageAlt }: PageHeroProps) {
   return (
-    <section className="site-shell page-hero grid gap-10 py-12 md:py-16 lg:grid-cols-[.88fr_1.12fr] lg:items-end lg:py-20">
-      <div className="rise-in max-w-2xl">
-        <h1>{title}</h1>
-        <p className="page-lede">{description}</p>
-      </div>
-      <div className="relative min-h-[320px] overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface-muted)] md:min-h-[420px]">
-        <Image src={image} alt={imageAlt} fill priority sizes="(min-width: 1024px) 55vw, 100vw" className="object-cover" />
+    <section className={styles.hero}>
+      <div className={`site-shell ${styles.shell}`}>
+        <div className={`${styles.copy} rise-in`}>
+          <h1 className={styles.title}>{title}</h1>
+          <p className={styles.description}>{description}</p>
+        </div>
+        <div className={styles.media}>
+          <Image src={image} alt={imageAlt} fill priority sizes="(min-width: 1024px) 55vw, 100vw" className="object-cover" />
+        </div>
       </div>
     </section>
   );

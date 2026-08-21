@@ -1,0 +1,74 @@
+.hero {
+  composes: hero from "./about-blueprint-hero.module.css";
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-height: min(42rem, calc(100dvh - 72px));
+  align-items: end;
+  gap: clamp(3rem, 8vw, 8rem);
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  padding-block: clamp(3.5rem, 6vw, 5rem) 3.5rem;
+}
+
+.copy {
+  max-width: 42rem;
+  align-self: center;
+}
+
+.title {
+  max-width: 15ch;
+  color: var(--about-hero-ink);
+  font-size: clamp(2.75rem, 4.7vw, 4.7rem);
+  font-weight: 800;
+  letter-spacing: -0.072em;
+  line-height: 0.98;
+}
+
+.description {
+  max-width: 42rem;
+  margin-top: 1.5rem;
+  color: var(--about-hero-muted);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.media {
+  position: relative;
+  min-height: clamp(20rem, 42vw, 34rem);
+  overflow: hidden;
+  border: 1px solid var(--about-hero-grid);
+  border-radius: 20px;
+  background: rgba(4, 42, 67, 0.24);
+  box-shadow: 0 24px 80px rgba(3, 24, 40, 0.22);
+}
+
+@media (min-width: 768px) {
+  .media {
+    min-height: min(34rem, calc(100dvh - 10rem));
+  }
+}
+
+@media (max-width: 767px) {
+  .shell {
+    min-height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3rem;
+    padding-block: 4.5rem 4rem;
+  }
+
+  .copy {
+    align-self: auto;
+  }
+
+  .title {
+    max-width: 13ch;
+    font-size: clamp(2.75rem, 13vw, 4.5rem);
+  }
+
+  .description {
+    max-width: 34ch;
+  }
+}

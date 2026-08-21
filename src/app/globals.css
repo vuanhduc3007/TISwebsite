@@ -475,10 +475,6 @@ h2 {
   line-height: 1.75;
 }
 
-.page-hero {
-  min-height: min(42rem, calc(100dvh - 72px));
-}
-
 .content-grid {
   display: grid;
   gap: 1.5rem;

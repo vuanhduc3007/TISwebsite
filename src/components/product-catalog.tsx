@@ -90,7 +90,7 @@ export function ProductCatalog({ products }: ProductCatalogProps) {
 
   return (
     <>
-      <section className="site-shell pb-16 pt-4 md:pb-20">
+      <section className="site-shell section-space">
         <div className="content-panel">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)] md:items-end">
             <label className="grid gap-2" htmlFor="product-search">
