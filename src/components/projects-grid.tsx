@@ -6,12 +6,9 @@ import {
   IconCalendar,
   IconChevronLeft,
   IconChevronRight,
-  IconMapPin,
-  IconPhoto,
-  IconReceiptTax,
-  IconX
+  IconMapPin
 } from "@tabler/icons-react";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Project, ProjectImage, ProjectPillar } from "@/lib/projects-contract";
 
 type ProjectMediaProps = {
@@ -35,10 +32,7 @@ function usePrefersReducedMotion() {
 }
 
 export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
-  const dialogTitleId = useId();
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const imageCount = images.length;
@@ -56,42 +50,16 @@ export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
   );
 
   useEffect(() => {
-    if (!hasMultiple || lightboxOpen || prefersReducedMotion) {
+    if (!hasMultiple || prefersReducedMotion) {
       return;
     }
 
     const timer = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % imageCount);
-    }, 5000);
+    }, 6000);
 
     return () => window.clearInterval(timer);
-  }, [hasMultiple, imageCount, lightboxOpen, prefersReducedMotion]);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) {
-      return;
-    }
-
-    if (lightboxOpen && !dialog.open) {
-      dialog.showModal();
-    }
-
-    if (!lightboxOpen && dialog.open) {
-      dialog.close();
-    }
-  }, [lightboxOpen]);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) {
-      return;
-    }
-
-    const handleClose = () => setLightboxOpen(false);
-    dialog.addEventListener("close", handleClose);
-    return () => dialog.removeEventListener("close", handleClose);
-  }, []);
+  }, [hasMultiple, imageCount, prefersReducedMotion]);
 
   if (!imageCount) {
     return null;
@@ -99,19 +67,13 @@ export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
 
   const frameClass =
     layout === "featured"
-      ? "relative w-full lg:w-1/2 min-h-[16rem] aspect-[4/3] lg:aspect-auto lg:min-h-[20rem]"
-      : "relative w-full aspect-[4/3] mt-2";
-
-  const openLightbox = () => setLightboxOpen(true);
+      ? "w-full lg:w-1/2 flex flex-col gap-2 shrink-0"
+      : "w-full flex flex-col gap-2 mt-2";
 
   return (
-    <>
-      <button
-        type="button"
-        className={`group ${frameClass} overflow-hidden rounded-[12px] bg-[var(--surface-muted)] shrink-0 cursor-zoom-in border-0 p-0 text-left`}
-        onClick={openLightbox}
-        aria-label={hasMultiple ? `Xem ${imageCount} ảnh dự án ${title}` : `Phóng to ảnh dự án ${title}`}
-      >
+    <div className={frameClass}>
+      {/* Khung ảnh chính trực quan */}
+      <div className="relative aspect-[16/10] sm:aspect-[4/3] w-full overflow-hidden rounded-[14px] bg-[var(--surface-muted)] border border-[var(--line)] shadow-xs group">
         {images.map((image, index) => (
           <Image
             key={image.id}
@@ -119,127 +81,91 @@ export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
             alt={image.alt}
             fill
             sizes={layout === "featured" ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 33vw, 100vw"}
-            className={`object-cover transition duration-700 ease-out group-hover:scale-[1.02] ${
-              index === activeIndex ? "opacity-100" : "opacity-0"
+            className={`object-cover transition-opacity duration-500 ease-out ${
+              index === activeIndex ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
             priority={index === 0}
           />
         ))}
 
-        <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-3 text-xs font-medium text-white">
-          {hasMultiple ? (
-            <span className="inline-flex items-center gap-1.5 font-semibold">
-              <IconPhoto size={16} aria-hidden />
-              {activeIndex + 1}/{imageCount} · Bấm xem album ảnh
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5">
-              <IconPhoto size={16} aria-hidden />
-              Bấm để phóng to
-            </span>
-          )}
-        </span>
-
+        {/* Nút lùi / tiến ảnh trực tiếp trên thẻ */}
         {hasMultiple ? (
-          <span className="pointer-events-none absolute top-3 right-3 rounded-full bg-black/65 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-white uppercase backdrop-blur-sm">
-            Album ({imageCount} ảnh)
-          </span>
-        ) : null}
-      </button>
-
-      <dialog
-        ref={dialogRef}
-        className="project-lightbox fixed inset-0 z-[100] m-0 flex h-full max-h-none w-full max-w-none items-center justify-center border-0 bg-transparent p-4 backdrop:bg-black/75"
-        aria-labelledby={dialogTitleId}
-        onClick={(event) => {
-          if (event.target === dialogRef.current) {
-            setLightboxOpen(false);
-          }
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowRight") {
-            event.preventDefault();
-            goTo(activeIndex + 1);
-          }
-          if (event.key === "ArrowLeft") {
-            event.preventDefault();
-            goTo(activeIndex - 1);
-          }
-        }}
-      >
-        <div className="relative flex max-h-[min(90vh,56rem)] w-full max-w-5xl flex-col gap-4 rounded-[16px] bg-[var(--surface)] p-4 shadow-[var(--shadow)] md:p-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p id={dialogTitleId} className="text-lg font-semibold text-[var(--ink)]">
-                {title}
-              </p>
-              {images[activeIndex]?.caption ? (
-                <p className="mt-1 text-sm text-[var(--ink-muted)]">{images[activeIndex].caption}</p>
-              ) : null}
-            </div>
+          <>
             <button
               type="button"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-muted)] text-[var(--ink)] transition hover:bg-[var(--line)]"
-              onClick={() => setLightboxOpen(false)}
-              aria-label="Đóng album ảnh"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/50 hover:bg-black/75 text-white backdrop-blur-xs transition shadow-md opacity-90 hover:scale-105 active:scale-95 cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                goTo(activeIndex - 1);
+              }}
+              aria-label="Ảnh trước"
             >
-              <IconX size={20} />
+              <IconChevronLeft size={20} stroke={2.2} />
             </button>
-          </div>
+            <button
+              type="button"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/50 hover:bg-black/75 text-white backdrop-blur-xs transition shadow-md opacity-90 hover:scale-105 active:scale-95 cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                goTo(activeIndex + 1);
+              }}
+              aria-label="Ảnh tiếp theo"
+            >
+              <IconChevronRight size={20} stroke={2.2} />
+            </button>
 
-          <div className="relative min-h-[16rem] flex-1 overflow-hidden rounded-[12px] bg-[var(--surface-muted)] md:min-h-[24rem]">
-            <Image
-              src={images[activeIndex].url}
-              alt={images[activeIndex].alt}
-              fill
-              sizes="(min-width: 1024px) 80vw, 100vw"
-              className="object-contain"
-              priority
-            />
+            {/* Chỉ số ảnh & tổng số ảnh */}
+            <div className="absolute top-2.5 right-2.5 z-10 rounded-full bg-black/65 px-2.5 py-1 text-[11px] font-bold tracking-wide text-white backdrop-blur-sm shadow-xs">
+              {activeIndex + 1} / {imageCount} ảnh
+            </div>
 
-            {hasMultiple ? (
-              <>
-                <button
-                  type="button"
-                  className="absolute top-1/2 left-3 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white transition hover:bg-black/70"
-                  onClick={() => goTo(activeIndex - 1)}
-                  aria-label="Ảnh trước"
-                >
-                  <IconChevronLeft size={22} />
-                </button>
-                <button
-                  type="button"
-                  className="absolute top-1/2 right-3 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white transition hover:bg-black/70"
-                  onClick={() => goTo(activeIndex + 1)}
-                  aria-label="Ảnh sau"
-                >
-                  <IconChevronRight size={22} />
-                </button>
-              </>
-            ) : null}
-          </div>
-
-          {hasMultiple ? (
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {images.map((image, index) => (
-                <button
-                  key={image.id}
-                  type="button"
-                  className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-[8px] border-2 transition ${
-                    index === activeIndex ? "border-[var(--accent)]" : "border-transparent opacity-70 hover:opacity-100"
+            {/* Dãy chấm nhỏ điều hướng (Dots indicator) */}
+            <div className="absolute bottom-2.5 inset-x-0 z-10 flex justify-center items-center gap-1.5 pointer-events-none">
+              {images.map((img, idx) => (
+                <span
+                  key={img.id}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    idx === activeIndex ? "w-5 bg-white shadow-sm" : "w-1.5 bg-white/50"
                   }`}
-                  onClick={() => goTo(index)}
-                  aria-label={`Xem ảnh ${index + 1}`}
-                  aria-current={index === activeIndex}
-                >
-                  <Image src={image.url} alt="" fill sizes="96px" className="object-cover" />
-                </button>
+                />
               ))}
             </div>
-          ) : null}
+          </>
+        ) : null}
+      </div>
+
+      {/* Chú thích ảnh (nếu có) */}
+      {images[activeIndex]?.caption ? (
+        <p className="text-xs italic text-[var(--ink-muted)] line-clamp-1 px-1">
+          {images[activeIndex].caption}
+        </p>
+      ) : null}
+
+      {/* Dải ảnh nhỏ thu nhỏ (Thumbnails) để khách bấm xem ảnh khác trực tiếp */}
+      {hasMultiple ? (
+        <div className="flex gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-thin">
+          {images.map((image, index) => (
+            <button
+              key={image.id}
+              type="button"
+              className={`relative h-11 w-16 sm:h-12 sm:w-18 shrink-0 overflow-hidden rounded-[8px] border-2 transition-all cursor-pointer ${
+                index === activeIndex
+                  ? "border-[var(--accent)] ring-2 ring-[var(--accent)]/30 scale-[1.02] opacity-100"
+                  : "border-transparent opacity-60 hover:opacity-100"
+              }`}
+              onClick={(e) => {
+                e.preventDefault();
+                goTo(index);
+              }}
+              aria-label={`Xem ảnh ${index + 1}`}
+              aria-current={index === activeIndex}
+            >
+              <Image src={image.url} alt="" fill sizes="72px" className="object-cover" />
+            </button>
+          ))}
         </div>
-      </dialog>
-    </>
+      ) : null}
+    </div>
   );
 }
 
