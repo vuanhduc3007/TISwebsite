@@ -3,7 +3,7 @@ import "server-only";
 import type { RowDataPacket } from "mysql2";
 import { featuredProjects } from "@/content/projects-data";
 import { DatabaseConfigurationError, getDatabasePool } from "@/lib/db";
-import { toProjectImageUrl } from "@/lib/project-image";
+import { resolveProjectImages, toProjectImageUrl } from "@/lib/project-image";
 import type { Project, ProjectImage } from "@/lib/projects-contract";
 
 type ProjectRow = RowDataPacket & {
@@ -55,6 +55,41 @@ const LIST_PROJECT_IMAGES_QUERY = `
   ORDER BY pi.project_id ASC, pi.sort_order ASC, pi.id ASC
 `;
 
+/*
+  Query gợi ý — lấy dự án kèm ảnh đại diện (cover) với fallback SQL khi chưa có album:
+
+  SELECT
+    p.id,
+    p.name,
+    p.client,
+    p.pillar,
+    p.location,
+    p.contract_value_vnd,
+    p.contract_date,
+    p.date_display,
+    p.is_highlight,
+    COALESCE(
+      (
+        SELECT pi.image_url
+        FROM project_images AS pi
+        WHERE pi.project_id = p.id
+        ORDER BY pi.sort_order ASC, pi.id ASC
+        LIMIT 1
+      ),
+      CASE p.pillar
+        WHEN 'it' THEN '/images/projects/hero_main.jpg'
+        WHEN 'me' THEN '/images/projects/electrical-panel-installation.jpg'
+        ELSE '/images/projects/cho-kim-tan-rooftop-panels-01.jpg'
+      END
+    ) AS cover_image_url
+  FROM projects AS p
+  WHERE p.status = 'published'
+  ORDER BY p.sort_order ASC, p.contract_value_vnd DESC, p.id DESC;
+
+  Lưu ý: app hiện dùng 2 query (projects + project_images) rồi gom ảnh ở TypeScript,
+  và gọi resolveProjectImages() khi album rỗng — an toàn hơn JSON_ARRAYAGG khi LEFT JOIN.
+*/
+
 function formatContractValue(value: number) {
   if (!Number.isFinite(value) || value <= 0) {
     return "Liên hệ";
@@ -104,7 +139,7 @@ function mapProjectRow(row: ProjectRow, images: ProjectImage[]): Project {
     value: formatContractValue(valueNumber),
     date: formatProjectDate(row.contract_date, row.date_display),
     isHighlight: Boolean(row.is_highlight),
-    images
+    images: resolveProjectImages(images, row.pillar, row.name.trim())
   };
 }
 
@@ -128,7 +163,7 @@ function mapStaticProjects(): Project[] {
       value: project.value,
       date: project.date,
       isHighlight: project.valueNumber === 22186327987,
-      images
+      images: resolveProjectImages(images, project.pillar, project.name)
     };
   });
 }

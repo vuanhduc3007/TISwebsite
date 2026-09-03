@@ -24,19 +24,19 @@ export default function HomePage() {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 site-shell w-full py-20 reveal">
-          <div className="max-w-3xl">
-            <p className="inline-block px-3 py-1 mb-8 text-sm font-bold tracking-wider uppercase bg-[var(--surface)]/10 text-[var(--accent)] border border-[var(--accent)]/30 backdrop-blur-sm rounded-sm">
+        <div className="relative z-10 site-shell w-full py-24 sm:py-32 reveal">
+          <div className="max-w-3xl flex flex-col items-start gap-6 sm:gap-8 lg:gap-9">
+            <p className="inline-flex items-center px-4 py-1.5 text-xs sm:text-sm font-bold tracking-widest uppercase bg-black/40 text-[var(--accent)] border border-[var(--accent)]/40 backdrop-blur-md rounded-full shadow-sm">
               Giải pháp toàn diện
             </p>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-8 leading-normal">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.25] sm:leading-[1.2] drop-shadow-sm">
               CNTT, Cơ điện và Năng lượng tái tạo
             </h1>
-            <p className="text-lg text-gray-300 mb-12 max-w-xl leading-relaxed">
+            <p className="text-lg sm:text-xl text-slate-200 font-normal leading-relaxed max-w-2xl">
               TIS tư vấn, thiết kế và thi công giải pháp cho công trình tại Việt Nam từ năm 2013. Bền vững, tối ưu và chuyên nghiệp.
             </p>
-            <div className="flex flex-col sm:flex-row items-start gap-4">
-              <Link className="inline-flex items-center justify-center bg-[var(--accent)] text-black font-semibold hover:bg-[var(--accent-strong)] transition-colors text-base px-8 py-4 uppercase tracking-widest" href="/contact">
+            <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-start gap-4">
+              <Link className="inline-flex items-center justify-center bg-[var(--accent)] text-black font-bold hover:bg-[var(--accent-strong)] transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-sm sm:text-base px-8 py-4 rounded-xl uppercase tracking-wider shadow-lg shadow-[var(--accent)]/20" href="/contact">
                 Liên hệ ngay
               </Link>
             </div>

@@ -252,20 +252,34 @@ INSERT INTO projects (id, name, client, pillar, location, contract_value_vnd, co
 
 -- Project Images Seed
 INSERT INTO project_images (project_id, image_url, caption, sort_order) VALUES
+-- 1. Camera an ninh
+(1, '/images/projects/cam_an_ninh/1.jpg', 'Camera an ninh', 1),
+(1, '/images/projects/cam_an_ninh/2.jpg', 'Camera an ninh', 2),
+
+-- 2. Mạng, thoại và âm thanh
+(2, '/images/projects/mang_am_thanh/1.jpg', 'Mạng và âm thanh', 1),
+(2, '/images/projects/mang_am_thanh/2.jpg', 'Mạng và âm thanh', 2),
+
+-- 3. Một cửa điện tử
 (3, '/images/projects/1_cua_truc_tuyen/1.jpg', 'Hệ thống một cửa điện tử', 1),
 (3, '/images/projects/1_cua_truc_tuyen/2.jpg', 'Hệ thống một cửa điện tử', 2),
 (3, '/images/projects/1_cua_truc_tuyen/3.jpg', 'Hệ thống một cửa điện tử', 3),
 (3, '/images/projects/1_cua_truc_tuyen/4.jpg', 'Hệ thống một cửa điện tử', 4),
-(4, '/images/projects/electrical-panel-installation.jpg', 'Lắp đặt tủ điện phân phối trung tâm', 1),
+
+-- 5. Chợ kim tân 
 (5, '/images/projects/cho-kim-tan-rooftop-panels-01.jpg', 'Tấm pin trên mái Chợ Kim Tân', 1),
 (5, '/images/projects/cho-kim-tan-crane-install.jpg', 'Lắp đặt bằng cẩu tại công trình', 2),
 (5, '/images/projects/cho-kim-tan-rooftop-panels-02.jpg', 'Mảng pin mái nhà', 3),
 (5, '/images/projects/cho-kim-tan-exterior-01.jpg', 'Tổng thể công trình', 4),
 (5, '/images/projects/electrical-panel-installation.jpg', 'Tủ điện và hệ thống kết nối', 5),
-(6, '/images/projects/cho-thuan-thanh-exterior.jpg', 'Chợ Thuận Thành', 1),
-(6, '/images/projects/cho_thuan_thanh/1.jpg', 'Mái pin Chợ Thuận Thành', 2),
-(6, '/images/projects/cho_thuan_thanh/2.jpg', 'Mái pin Chợ Thuận Thành', 3),
+
+-- 6. Chợ Thuận Thành
+(6, '/images/projects/cho_thuan_thanh/1.jpg', 'Mái pin Chợ Thuận Thành', 1),
+(6, '/images/projects/cho_thuan_thanh/2.jpg', 'Mái pin Chợ Thuận Thành', 2),
+(6, '/images/projects/cho_thuan_thanh/3.jpg', 'Mái pin Chợ Thuận Thành', 3),
+
+-- 7. Chợ Ngã Tư Dâu
 (7, '/images/projects/nga_tu_dau/1.jpg', 'Flycam mái pin', 1),
-(7, '/images/projects/nga_tu_dau/2.jpg', 'Flycam mái pin', 2),
+(7, '/images/projects/nga_tu_dau/2.jpg', 'Mái pin', 2),
 (7, '/images/projects/nga_tu_dau/3.jpg', 'Biến tần', 3),
-(7, '/images/projects/nga_tu_dau/4.jpg', 'Tủ điện', 4);
+(7, '/images/projects/nga_tu_dau/4.jpg', 'Tủ điện', 4),

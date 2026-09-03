@@ -2,17 +2,22 @@
 
 import Image from "next/image";
 import {
+  IconBolt,
   IconBuildingCommunity,
   IconCalendar,
   IconChevronLeft,
   IconChevronRight,
-  IconMapPin
+  IconCpu,
+  IconMapPin,
+  IconSunHigh
 } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
+import { resolveProjectImages } from "@/lib/project-image";
 import type { Project, ProjectImage, ProjectPillar } from "@/lib/projects-contract";
 
 type ProjectMediaProps = {
   title: string;
+  pillar: ProjectPillar;
   images: ProjectImage[];
   layout: "compact" | "featured";
 };
@@ -31,11 +36,13 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
+export function ProjectMedia({ title, pillar, images, layout }: ProjectMediaProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const displayImages = resolveProjectImages(images, pillar, title);
+  const usingPlaceholder = !images.length;
 
-  const imageCount = images.length;
+  const imageCount = displayImages.length;
   const hasMultiple = imageCount > 1;
 
   const goTo = useCallback(
@@ -61,9 +68,19 @@ export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
     return () => window.clearInterval(timer);
   }, [hasMultiple, imageCount, prefersReducedMotion]);
 
-  if (!imageCount) {
-    return null;
-  }
+  // Khi dữ liệu album thay đổi (ví dụ đổi bộ lọc), không để index vượt quá số ảnh.
+  useEffect(() => {
+    setActiveIndex((current) => (current < imageCount ? current : 0));
+  }, [imageCount]);
+
+  // Dùng functional update để lượt bấm liên tiếp không bị giữ lại activeIndex cũ.
+  const showPreviousImage = useCallback(() => {
+    setActiveIndex((current) => (current - 1 + imageCount) % imageCount);
+  }, [imageCount]);
+
+  const showNextImage = useCallback(() => {
+    setActiveIndex((current) => (current + 1) % imageCount);
+  }, [imageCount]);
 
   const frameClass =
     layout === "featured"
@@ -74,19 +91,23 @@ export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
     <div className={frameClass}>
       {/* Khung ảnh chính trực quan */}
       <div className="relative aspect-[16/10] sm:aspect-[4/3] w-full overflow-hidden rounded-[14px] bg-[var(--surface-muted)] border border-[var(--line)] shadow-xs group">
-        {images.map((image, index) => (
-          <Image
-            key={image.id}
-            src={image.url}
-            alt={image.alt}
-            fill
-            sizes={layout === "featured" ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 33vw, 100vw"}
-            className={`object-cover transition-opacity duration-500 ease-out ${
-              index === activeIndex ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
-            priority={index === 0}
-          />
-        ))}
+        <div
+          className="absolute inset-0 flex transition-transform duration-500 ease-out"
+          style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+        >
+          {displayImages.map((image, index) => (
+            <div key={image.id} className="relative min-w-full h-full">
+              <Image
+                src={image.url}
+                alt={image.alt}
+                fill
+                sizes={layout === "featured" ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 33vw, 100vw"}
+                className="object-cover"
+                priority={index === 0}
+              />
+            </div>
+          ))}
+        </div>
 
         {/* Nút lùi / tiến ảnh trực tiếp trên thẻ */}
         {hasMultiple ? (
@@ -96,7 +117,8 @@ export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
               className="absolute left-2.5 top-1/2 -translate-y-1/2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/50 hover:bg-black/75 text-white backdrop-blur-xs transition shadow-md opacity-90 hover:scale-105 active:scale-95 cursor-pointer"
               onClick={(e) => {
                 e.preventDefault();
-                goTo(activeIndex - 1);
+                e.stopPropagation();
+                showPreviousImage();
               }}
               aria-label="Ảnh trước"
             >
@@ -107,7 +129,8 @@ export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
               className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/50 hover:bg-black/75 text-white backdrop-blur-xs transition shadow-md opacity-90 hover:scale-105 active:scale-95 cursor-pointer"
               onClick={(e) => {
                 e.preventDefault();
-                goTo(activeIndex + 1);
+                e.stopPropagation();
+                showNextImage();
               }}
               aria-label="Ảnh tiếp theo"
             >
@@ -121,7 +144,7 @@ export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
 
             {/* Dãy chấm nhỏ điều hướng (Dots indicator) */}
             <div className="absolute bottom-2.5 inset-x-0 z-10 flex justify-center items-center gap-1.5 pointer-events-none">
-              {images.map((img, idx) => (
+              {displayImages.map((img, idx) => (
                 <span
                   key={img.id}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
@@ -135,16 +158,19 @@ export function ProjectMedia({ title, images, layout }: ProjectMediaProps) {
       </div>
 
       {/* Chú thích ảnh (nếu có) */}
-      {images[activeIndex]?.caption ? (
+      {displayImages[activeIndex]?.caption ? (
         <p className="text-xs italic text-[var(--ink-muted)] line-clamp-1 px-1">
-          {images[activeIndex].caption}
+          {displayImages[activeIndex].caption}
+          {usingPlaceholder ? " (chưa có album ảnh)" : ""}
         </p>
+      ) : usingPlaceholder ? (
+        <p className="text-xs italic text-[var(--ink-muted)] line-clamp-1 px-1">Ảnh minh họa — chưa có album ảnh</p>
       ) : null}
 
       {/* Dải ảnh nhỏ thu nhỏ (Thumbnails) để khách bấm xem ảnh khác trực tiếp */}
       {hasMultiple ? (
         <div className="flex gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-thin">
-          {images.map((image, index) => (
+          {displayImages.map((image, index) => (
             <button
               key={image.id}
               type="button"
@@ -249,6 +275,7 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
 
                 <ProjectMedia
                   title={project.name}
+                  pillar={project.pillar}
                   images={project.images}
                   layout={isFeaturedLayout ? "featured" : "compact"}
                 />
@@ -264,20 +291,23 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
 function CategoryBadge({ pillar }: { pillar: ProjectPillar }) {
   if (pillar === "it") {
     return (
-      <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+      <span className="badge-category badge-category-it">
+        <IconCpu size={14} strokeWidth={2.2} aria-hidden="true" />
         Công nghệ thông tin
       </span>
     );
   }
   if (pillar === "me") {
     return (
-      <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
-        Hệ thống cơ điện M&E
+      <span className="badge-category badge-category-me">
+        <IconBolt size={14} strokeWidth={2.2} aria-hidden="true" />
+        Cơ điện &amp; HVAC
       </span>
     );
   }
   return (
-    <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+    <span className="badge-category badge-category-renewable">
+      <IconSunHigh size={14} strokeWidth={2.2} aria-hidden="true" />
       Năng lượng tái tạo
     </span>
   );
