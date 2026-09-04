@@ -8,7 +8,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="site-shell flex h-[72px] items-center justify-between gap-4">
         <Link className="brand" href="/" aria-label="TIS - Trang chủ">
-          <Image src="/brand/tis-logo-horizontal.png" alt="TIS" width={140} height={65} className="w-auto h-12 lg:h-16 object-contain" priority />
+          <Image src="/brand/tis-logo-horizontal.png" alt="TIS" width={180} height={84} className="w-auto h-16 lg:h-20 object-contain" priority />
         </Link>
 
         <nav className="hidden items-center gap-10 lg:flex" aria-label="Điều hướng chính">

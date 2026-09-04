@@ -3,15 +3,15 @@ import { ContactBlueprint } from "@/components/contact-blueprint";
 import { company } from "@/content/company";
 
 export const metadata: Metadata = {
-  title: "Trao đổi cùng TIS",
-  description: "Trao đổi cùng TIS về công trình, thiết bị và giải pháp CNTT, cơ điện, năng lượng tái tạo."
+  title: "Trao đổi cùng Công ty TIS",
+  description: "Trao đổi cùng Công ty TIS về công trình, thiết bị và giải pháp CNTT, cơ điện, năng lượng tái tạo."
 };
 
 export default function ContactPage() {
   return (
     <main>
       <ContactBlueprint
-        title="Trao đổi cùng TIS"
+        title="Trao đổi cùng Công ty TIS"
         description="Cho chúng tôi biết công trình hoặc nhóm thiết bị bạn đang quan tâm. Thông tin ban đầu càng rõ, tư vấn càng sát nhu cầu."
         legalName={company.legalNameVN}
         motto={company.motto}

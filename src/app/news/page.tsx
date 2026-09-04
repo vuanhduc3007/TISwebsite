@@ -8,7 +8,7 @@ import { supportTopics, type SupportCategory, type SupportTopic } from "@/conten
 
 export const metadata: Metadata = {
   title: "Hỗ trợ kỹ thuật",
-  description: "Hướng dẫn thực tế cho hệ thống năng lượng mặt trời và mạng Wi-Fi từ TIS."
+  description: "Hướng dẫn thực tế cho hệ thống năng lượng mặt trời và mạng Wi-Fi từ Công ty TIS."
 };
 
 const categoryContent: Record<SupportCategory, {
@@ -64,7 +64,7 @@ export default function TechnicalSupportPage() {
         description="Hướng dẫn thực tế, checklist bảo trì và cách khoanh vùng sự cố cho hệ thống điện mặt trời và mạng Wi-Fi."
         eyebrow="// Trung tâm hỗ trợ"
         titleId="support-blueprint-title"
-        metricsIntro="Bản đồ hỗ trợ"
+        metricsIntro="Tổng quan hỗ trợ"
         signature="TIS / SUPPORT DESK"
         metrics={[
           { label: "Nhóm giải pháp", value: "02", detail: "Điện mặt trời · Mạng Wi-Fi", offset: "none" },
@@ -111,7 +111,7 @@ export default function TechnicalSupportPage() {
             <div className="flex items-start gap-3">
               <IconListCheck className="mt-1 h-7 w-7 shrink-0 text-black" stroke={1.7} aria-hidden="true" />
               <div>
-                <h2 id="support-escalation-heading">Cần hỗ trợ trực tiếp từ kỹ sư TIS?</h2>
+                <h2 id="support-escalation-heading">Cần hỗ trợ trực tiếp từ kỹ sư Công ty TIS?</h2>
                 <p className="max-w-2xl text-black/70">Gửi thông tin công trình hoặc gọi hotline để đội ngũ kỹ thuật cùng bạn xác định nguyên nhân và hướng xử lý phù hợp.</p>
               </div>
             </div>

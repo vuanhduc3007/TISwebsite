@@ -1,6 +1,6 @@
 export const company = {
-  name: "TIS",
-  legalNameVN: "Công Ty Cổ Phần Thương Mại Và Dịch Vụ Tin Học Viễn Thông TIS",
+  name: "Công ty TIS",
+  legalNameVN: "Công Ty Cổ Phần Thương Mại Và Dịch Vụ Tin Học Viễn Thông\u00A0TIS",
   legalNameEN: "TIS Telecommunications Informatics Services And Trade Joint Stock Company",
   taxCode: "0106229287",
   established: "11/07/2013",
@@ -49,9 +49,9 @@ export const serviceLines = [
   "Đầu tư, hợp tác đầu tư và chuyển giao công nghệ năng lượng tái tạo"
 ];
 
-export const vision = "TIS hướng tới trở thành doanh nghiệp Việt Nam hàng đầu trong lĩnh vực CNTT, cơ điện lạnh và năng lượng tái tạo, tiên phong trong công cuộc chuyển đổi số quốc gia, xây dựng giải pháp hiện đại và thân thiện với môi trường, góp phần đưa Việt Nam đạt chuẩn khu vực và quốc tế.";
+export const vision = "Công ty TIS hướng tới trở thành doanh nghiệp Việt Nam hàng đầu trong lĩnh vực CNTT, cơ điện lạnh và năng lượng tái tạo, tiên phong trong công cuộc chuyển đổi số quốc gia, xây dựng giải pháp hiện đại và thân thiện với môi trường, góp phần đưa Việt Nam đạt chuẩn khu vực và quốc tế.";
 
-export const mission = "TIS cam kết cung cấp giải pháp toàn diện, kết hợp công nghệ tiên tiến với dịch vụ chuyên nghiệp. Không chỉ tư vấn, thiết kế, xây dựng và cung cấp thiết bị mà còn đồng hành cùng khách hàng trong toàn bộ vòng đời dự án, tối ưu hóa hiệu quả đầu tư, nâng cao năng lực cạnh tranh và hỗ trợ xây dựng xã hội xanh, thông minh, bền vững.";
+export const mission = "Công ty TIS cam kết cung cấp giải pháp toàn diện, kết hợp công nghệ tiên tiến với dịch vụ chuyên nghiệp. Không chỉ tư vấn, thiết kế, xây dựng và cung cấp thiết bị mà còn đồng hành cùng khách hàng trong toàn bộ vòng đời dự án, tối ưu hóa hiệu quả đầu tư, nâng cao năng lực cạnh tranh và hỗ trợ xây dựng xã hội xanh, thông minh, bền vững.";
 
 export const coreValues = [
   { title: "Đổi mới sáng tạo", titleEN: "Innovation" },

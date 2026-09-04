@@ -23,7 +23,7 @@ export function AboutBlueprintHero({
   description,
   metrics,
   eyebrow = "// Hồ sơ năng lực",
-  metricsIntro = "Một vài điểm neo",
+  metricsIntro = "Thông tin nổi bật",
   signature = "TIS / 2013 — hiện tại",
   titleId = "about-blueprint-title"
 }: AboutBlueprintHeroProps) {

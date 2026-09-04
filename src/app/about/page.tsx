@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Giới thiệu",
-  description: "TIS hoạt động từ năm 2013 trong lĩnh vực CNTT, cơ điện và năng lượng tái tạo.",
+  description: "Công ty TIS hoạt động từ năm 2013 trong lĩnh vực CNTT, cơ điện và năng lượng tái tạo.",
 };
 
 const valueIcons = {
@@ -21,11 +21,11 @@ export default function AboutPage() {
   return (
     <main>
       <AboutBlueprintHero
-        title="Về TIS"
-        description="TIS hoạt động từ năm 2013 trong lĩnh vực CNTT, cơ điện và năng lượng tái tạo. Chúng tôi tư vấn, thiết kế và thi công giải pháp phù hợp với từng công trình."
+        title="Về Công ty TIS"
+        description="Công ty TIS hoạt động từ năm 2013 trong lĩnh vực CNTT, cơ điện và năng lượng tái tạo. Chúng tôi tư vấn, thiết kế và thi công giải pháp phù hợp với từng công trình."
         metrics={[
           { label: "Năm thành lập", value: company.established.slice(-4), detail: "Nền tảng đồng hành lâu dài", offset: "none" },
-          { label: "Lĩnh vực cốt lõi", value: String(pillars.length).padStart(2, "0"), detail: "CNTT · Cơ điện · Năng lượng", offset: "small" },
+          { label: "Lĩnh vực cốt lõi", value: String(pillars.length).padStart(2, "0"), detail: "CNTT · Cơ điện · Năng\u00A0lượng", offset: "small" },
           { label: "Nhân sự chuyên môn", value: `${workforce.total}+`, detail: "Kỹ sư và kỹ thuật viên", offset: "large" }
         ]}
       />
@@ -81,11 +81,16 @@ export default function AboutPage() {
         <article className="content-panel reveal">
           <h2>Ba lĩnh vực chính</h2>
           <div className="mt-5 grid gap-5">
-            {pillars.map((pillar) => (
-              <div key={pillar.id} className="border-b border-[var(--line)] pb-4 last:border-0 last:pb-0">
-                <h3 className="font-semibold text-lg">{pillar.title}</h3>
-                <p className="text-[var(--ink-muted)] text-sm">{pillar.titleEN}</p>
-                <p className="mt-1">{pillar.description}</p>
+            {pillars.map((pillar, index) => (
+              <div key={pillar.id} className="border-b border-[var(--line)] pb-5 last:border-0 last:pb-0 relative pl-10">
+                <div className="absolute left-0 top-0.5 text-xl font-black text-[var(--accent)] opacity-50">
+                  {(index + 1).toString().padStart(2, '0')}
+                </div>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <h3 className="font-semibold text-lg">{pillar.title}</h3>
+                  <span className="text-[var(--ink-muted)] text-[0.7rem] uppercase tracking-wider px-2 py-0.5 bg-[var(--contact-grid-soft)] border border-[var(--line)] rounded">{pillar.titleEN}</span>
+                </div>
+                <p className="text-[var(--ink-muted)] leading-relaxed text-sm">{pillar.description}</p>
               </div>
             ))}
           </div>
@@ -118,11 +123,11 @@ export default function AboutPage() {
             const Icon = valueIcons[value.title as keyof typeof valueIcons] || IconBulb;
             return (
               <div key={value.title} className="content-panel text-center flex flex-col items-center reveal">
-                <div className="p-4 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] mb-4">
+                <div className="p-4 rounded-full bg-[var(--accent)]/20 text-[var(--accent)] mb-5">
                   <Icon size={28} strokeWidth={1.6} />
                 </div>
                 <h3 className="font-bold">{value.title}</h3>
-                <p className="text-[var(--ink-muted)] text-sm mt-1">{value.titleEN}</p>
+                <p className="text-[var(--ink-muted)] text-sm mt-2">{value.titleEN}</p>
               </div>
             );
           })}

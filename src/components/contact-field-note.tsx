@@ -35,7 +35,7 @@ export function ContactFieldNote() {
               Bắt đầu từ một cuộc trao đổi
             </h2>
             <p className={styles.description}>
-              Chia sẻ loại công trình và nhu cầu sử dụng. Đội ngũ TIS sẽ giúp bạn xác định giải pháp phù hợp nhất, tối ưu chi phí và hiệu năng.
+              Chia sẻ loại công trình và nhu cầu sử dụng. Đội ngũ Công ty TIS sẽ giúp bạn xác định giải pháp phù hợp nhất, tối ưu chi phí và hiệu năng.
             </p>
           </div>
 

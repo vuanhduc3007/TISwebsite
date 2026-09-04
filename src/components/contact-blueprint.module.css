@@ -72,7 +72,7 @@
 .formIndex,
 .metricLabel,
 .motto {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.18em;
   line-height: 1.4;
@@ -87,10 +87,10 @@
 .title {
   max-width: none;
   color: var(--contact-hero-ink);
-  font-size: clamp(3.25rem, 4.8vw, 5.25rem);
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
   font-weight: 800;
-  letter-spacing: -0.09em;
-  line-height: 0.86;
+  letter-spacing: -0.05em;
+  line-height: 1;
 }
 
 .rule {
@@ -105,17 +105,18 @@
   max-width: 45ch;
   margin-top: 1.6rem;
   color: var(--contact-hero-muted);
-  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  font-size: clamp(0.9375rem, 1.3vw, 1.0625rem);
   line-height: 1.8;
 }
 
 .legalName {
-  max-width: 45ch;
+  max-width: 55ch;
   margin-top: 2.25rem;
   color: var(--contact-hero-ink);
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.6;
+  text-wrap: balance;
 }
 
 .motto {
@@ -145,13 +146,6 @@
   border-bottom: 1px solid var(--contact-grid);
 }
 
-.metric[data-offset="small"] {
-  transform: translateX(1.5rem);
-}
-
-.metric[data-offset="large"] {
-  transform: translateX(-1rem);
-}
 
 .metric:hover {
   border-color: var(--accent);
@@ -316,17 +310,13 @@
   }
 
   .title {
-    font-size: clamp(3rem, 13vw, 4.5rem);
+    font-size: clamp(2.2rem, 10vw, 3rem);
   }
 
   .description {
     max-width: 34ch;
   }
 
-  .metric[data-offset="small"],
-  .metric[data-offset="large"] {
-    transform: none;
-  }
 
   .metric:hover {
     transform: translateX(0.2rem);

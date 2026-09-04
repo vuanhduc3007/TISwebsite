@@ -24,15 +24,20 @@ export function SiteFooter() {
             </p>
           </div>
         </div>
-        <nav className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3" aria-label="Điều hướng chân trang">
-          {navigation.map((item) => (
-            <Link className="footer-link" href={item.href} key={item.href}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="w-full h-[200px] md:h-[260px] rounded-xl overflow-hidden ring-1 ring-[var(--line)] shadow-sm hover:shadow-md transition-shadow">
+          <iframe 
+            src="https://maps.google.com/maps?q=S%E1%BB%91%2022,%20ng%C3%B5%20318/80,%20ph%E1%BB%91%20Ng%E1%BB%8Dc%20Tr%C3%AC,%20ph%C6%B0%E1%BB%9Dng%20Long%20Bi%C3%AAn,%20H%C3%A0%20N%E1%BB%99i&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+            width="100%" 
+            height="100%" 
+            style={{ border: 0 }} 
+            allowFullScreen 
+            loading="lazy" 
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Bản đồ vị trí Công ty TIS"
+          ></iframe>
+        </div>
       </div>
-      <div className="site-shell mt-8 text-sm text-[var(--ink-muted)]">© {new Date().getFullYear()} TIS. MST 0106229287. Chất lượng - Uy tín - Hiệu quả.</div>
+      <div className="site-shell mt-8 text-sm text-[var(--ink-muted)]">© {new Date().getFullYear()} Công ty TIS. MST 0106229287. Chất lượng - Uy tín - Hiệu quả.</div>
     </footer>
   );
 }

@@ -67,7 +67,7 @@
 .metricsIntro,
 .metricLabel,
 .signature {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.18em;
   line-height: 1.4;
@@ -83,10 +83,10 @@
 .title {
   max-width: none;
   color: var(--about-hero-ink);
-  font-size: clamp(3.25rem, 4.8vw, 5.25rem);
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
   font-weight: 800;
-  letter-spacing: -0.09em;
-  line-height: 0.86;
+  letter-spacing: -0.05em;
+  line-height: 1;
 }
 
 .rule {
@@ -101,7 +101,7 @@
   max-width: 45ch;
   margin-top: 1.6rem;
   color: var(--about-hero-muted);
-  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  font-size: clamp(0.9375rem, 1.3vw, 1.0625rem);
   line-height: 1.8;
 }
 
@@ -161,21 +161,22 @@
 
 .metricValue {
   color: var(--accent);
-  font-size: clamp(2.6rem, 5vw, 4.7rem);
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
-  letter-spacing: -0.08em;
+  letter-spacing: -0.05em;
   line-height: 0.9;
 }
 
 .metricDetail {
   align-self: end;
-  max-width: 9rem;
+  max-width: 12rem;
   padding-bottom: 0.2rem;
   color: var(--about-hero-muted);
   font-size: 0.78rem;
   line-height: 1.45;
   text-align: right;
+  text-wrap: balance;
 }
 
 .marker {

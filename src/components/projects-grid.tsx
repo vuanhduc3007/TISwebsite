@@ -157,40 +157,44 @@ export function ProjectMedia({ title, pillar, images, layout }: ProjectMediaProp
         ) : null}
       </div>
 
-      {/* Chú thích ảnh (nếu có) */}
-      {displayImages[activeIndex]?.caption ? (
-        <p className="text-xs italic text-[var(--ink-muted)] line-clamp-1 px-1">
-          {displayImages[activeIndex].caption}
-          {usingPlaceholder ? " (chưa có album ảnh)" : ""}
-        </p>
-      ) : usingPlaceholder ? (
-        <p className="text-xs italic text-[var(--ink-muted)] line-clamp-1 px-1">Ảnh minh họa — chưa có album ảnh</p>
-      ) : null}
+      <div className="min-h-[20px]">
+        {/* Chú thích ảnh (nếu có) */}
+        {displayImages[activeIndex]?.caption ? (
+          <p className="text-xs italic text-[var(--ink-muted)] line-clamp-1 px-1">
+            {displayImages[activeIndex].caption}
+            {usingPlaceholder ? " (chưa có album ảnh)" : ""}
+          </p>
+        ) : usingPlaceholder ? (
+          <p className="text-xs italic text-[var(--ink-muted)] line-clamp-1 px-1">Ảnh minh họa — chưa có album ảnh</p>
+        ) : null}
+      </div>
 
       {/* Dải ảnh nhỏ thu nhỏ (Thumbnails) để khách bấm xem ảnh khác trực tiếp */}
-      {hasMultiple ? (
-        <div className="flex gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-thin">
-          {displayImages.map((image, index) => (
-            <button
-              key={image.id}
-              type="button"
-              className={`relative h-11 w-16 sm:h-12 sm:w-18 shrink-0 overflow-hidden rounded-[8px] border-2 transition-all cursor-pointer ${
-                index === activeIndex
-                  ? "border-[var(--accent)] ring-2 ring-[var(--accent)]/30 scale-[1.02] opacity-100"
-                  : "border-transparent opacity-60 hover:opacity-100"
-              }`}
-              onClick={(e) => {
-                e.preventDefault();
-                goTo(index);
-              }}
-              aria-label={`Xem ảnh ${index + 1}`}
-              aria-current={index === activeIndex}
-            >
-              <Image src={image.url} alt="" fill sizes="72px" className="object-cover" />
-            </button>
-          ))}
-        </div>
-      ) : null}
+      <div className="min-h-[50px] sm:min-h-[54px]">
+        {hasMultiple ? (
+          <div className="flex gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-thin">
+            {displayImages.map((image, index) => (
+              <button
+                key={image.id}
+                type="button"
+                className={`relative h-11 w-16 sm:h-12 sm:w-18 shrink-0 overflow-hidden rounded-[8px] border-2 transition-all cursor-pointer ${
+                  index === activeIndex
+                    ? "border-[var(--accent)] ring-2 ring-[var(--accent)]/30 scale-[1.02] opacity-100"
+                    : "border-transparent opacity-60 hover:opacity-100"
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  goTo(index);
+                }}
+                aria-label={`Xem ảnh ${index + 1}`}
+                aria-current={index === activeIndex}
+              >
+                <Image src={image.url} alt="" fill sizes="72px" className="object-cover" />
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -243,41 +247,41 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
           Chưa có dự án nào thuộc danh mục này.
         </div>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-x-5 gap-y-8 lg:grid-cols-2" style={{ gridTemplateRows: 'auto' }}>
           {sortedProjects.map((project) => {
-            const isFeaturedLayout = project.isHighlight;
-
             return (
               <article
                 key={project.id}
-                className={`content-panel reveal flex flex-col justify-between ${
-                  isFeaturedLayout ? "lg:col-span-2 lg:flex-row gap-8 border-2 border-[var(--accent)]" : "gap-5"
-                }`}
+                className="content-panel reveal grid gap-4"
+                style={{ gridTemplateRows: 'subgrid', gridRow: 'span 5' }}
               >
-                <div className="flex flex-col gap-4 flex-1">
-                  <div className="flex flex-wrap gap-2 items-center">
-                    <CategoryBadge pillar={project.pillar} />
-                  </div>
+                {/* Row 1: Badge */}
+                <div className="flex flex-wrap gap-2 items-center">
+                  <CategoryBadge pillar={project.pillar} />
+                </div>
 
-                  <h2 className={`${isFeaturedLayout ? "text-2xl" : "text-xl"} font-bold text-[var(--ink)] leading-snug`}>
-                    {project.name}
-                  </h2>
+                {/* Row 2: Title */}
+                <h2 className="text-xl font-bold text-[var(--ink)] leading-snug">
+                  {project.name}
+                </h2>
 
-                  <ProjectDetails project={project} />
+                {/* Row 3: Details */}
+                <ProjectDetails project={project} />
 
-                  <div className="mt-4 pt-4 border-t border-[var(--line)] flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wider text-[var(--ink-muted)]">Giá trị hợp đồng</p>
-                      <p className="text-xl font-bold text-[var(--accent)]">{project.value}</p>
-                    </div>
+                {/* Row 4: Contract Value */}
+                <div className="pt-4 border-t border-[var(--line)] flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-[var(--ink-muted)]">Giá trị hợp đồng</p>
+                    <p className="text-xl font-bold text-[var(--accent)]">{project.value}</p>
                   </div>
                 </div>
 
+                {/* Row 5: Media */}
                 <ProjectMedia
                   title={project.name}
                   pillar={project.pillar}
                   images={project.images}
-                  layout={isFeaturedLayout ? "featured" : "compact"}
+                  layout="compact"
                 />
               </article>
             );
@@ -315,7 +319,7 @@ function CategoryBadge({ pillar }: { pillar: ProjectPillar }) {
 
 function ProjectDetails({ project }: { project: Project }) {
   return (
-    <div className="text-[var(--ink-muted)] text-sm space-y-2.5 mt-auto">
+    <div className="text-[var(--ink-muted)] text-sm space-y-2.5">
       <p className="flex items-start gap-2">
         <IconBuildingCommunity size={18} className="shrink-0 mt-0.5 text-[var(--accent)]" aria-hidden />
         <span className="leading-tight text-[var(--ink)]">

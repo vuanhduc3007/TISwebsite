@@ -10,7 +10,7 @@
     "db:init": "node scripts/init-db.mjs"
   },
   "dependencies": {
-    "@fontsource/manrope": "^5.2.7",
+    "@fontsource/be-vietnam-pro": "^5.3.0",
     "@tabler/icons-react": "^3.34.1",
     "mysql2": "^3.23.2",
     "next": "^16.0.0",

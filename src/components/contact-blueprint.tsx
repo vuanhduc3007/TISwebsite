@@ -43,7 +43,7 @@ export function ContactBlueprint({
 
       <div className={`site-shell ${styles.shell}`}>
         <div className={`${styles.copy} reveal`}>
-          <p className={styles.eyebrow}>// Kết nối với TIS</p>
+          <p className={styles.eyebrow}>// Kết nối với Công ty TIS</p>
           <h1 id="contact-blueprint-title" className={styles.title}>{title}</h1>
           <span className={styles.rule} aria-hidden="true" />
           <p className={styles.description}>{description}</p>
