@@ -10,7 +10,8 @@ export function ContactForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formEl = event.currentTarget;
+    const form = new FormData(formEl);
     const name = String(form.get("name") ?? "").trim();
     const phone = String(form.get("phone") ?? "").trim();
     const need = String(form.get("need") ?? "").trim();
@@ -34,7 +35,7 @@ export function ContactForm() {
       if (res.ok) {
         setState("success");
         // Reset form
-        event.currentTarget.reset();
+        formEl.reset();
       } else {
         const data = await res.json().catch(() => ({}));
         setErrorMsg(data.error ?? "Không thể gửi yêu cầu. Vui lòng thử lại sau.");

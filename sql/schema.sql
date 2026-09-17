@@ -266,12 +266,14 @@ INSERT INTO project_images (project_id, image_url, caption, sort_order) VALUES
 (3, '/images/projects/1_cua_truc_tuyen/3.jpg', 'Hệ thống một cửa điện tử', 3),
 (3, '/images/projects/1_cua_truc_tuyen/4.jpg', 'Hệ thống một cửa điện tử', 4),
 
+-- 4. Hệ thống cơ điện
+(4, '/images/projects/electrical-panel-installation.jpg', 'Lắp đặt tủ điện phân phối trung tâm', 1),
+
 -- 5. Chợ kim tân 
-(5, '/images/projects/cho-kim-tan-rooftop-panels-01.jpg', 'Tấm pin trên mái Chợ Kim Tân', 1),
-(5, '/images/projects/cho-kim-tan-crane-install.jpg', 'Lắp đặt bằng cẩu tại công trình', 2),
-(5, '/images/projects/cho-kim-tan-rooftop-panels-02.jpg', 'Mảng pin mái nhà', 3),
-(5, '/images/projects/cho-kim-tan-exterior-01.jpg', 'Tổng thể công trình', 4),
-(5, '/images/projects/electrical-panel-installation.jpg', 'Tủ điện và hệ thống kết nối', 5),
+(5, '/images/projects/cho_kim_tan/1.jpg', 'Tấm pin trên mái Chợ Kim Tân', 1),
+(5, '/images/projects/cho_kim_tan/2.jpg', 'Lắp đặt bằng cẩu tại công trình', 2),
+(5, '/images/projects/cho_kim_tan/3.jpg', 'Mảng pin mái nhà', 3),
+(5, '/images/projects/cho_kim_tan/4.jpg', 'Tổng thể công trình', 4),
 
 -- 6. Chợ Thuận Thành
 (6, '/images/projects/cho_thuan_thanh/1.jpg', 'Mái pin Chợ Thuận Thành', 1),
@@ -282,4 +284,4 @@ INSERT INTO project_images (project_id, image_url, caption, sort_order) VALUES
 (7, '/images/projects/nga_tu_dau/1.jpg', 'Flycam mái pin', 1),
 (7, '/images/projects/nga_tu_dau/2.jpg', 'Mái pin', 2),
 (7, '/images/projects/nga_tu_dau/3.jpg', 'Biến tần', 3),
-(7, '/images/projects/nga_tu_dau/4.jpg', 'Tủ điện', 4),
+(7, '/images/projects/nga_tu_dau/4.jpg', 'Tủ điện', 4);

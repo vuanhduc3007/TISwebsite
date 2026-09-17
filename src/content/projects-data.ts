@@ -60,11 +60,10 @@ export const featuredProjects: FeaturedProject[] = [
     valueNumber: 500000000,
     pillar: "renewable",
     images: [
-      "/images/projects/cho-kim-tan-rooftop-panels-01.jpg",
-      "/images/projects/cho-kim-tan-crane-install.jpg",
-      "/images/projects/cho-kim-tan-rooftop-panels-02.jpg",
-      "/images/projects/cho-kim-tan-exterior-01.jpg",
-      "/images/projects/electrical-panel-installation.jpg"
+      "/images/projects/cho_kim_tan/1.jpg",
+      "/images/projects/cho_kim_tan/2.jpg",
+      "/images/projects/cho_kim_tan/3.jpg",
+      "/images/projects/cho_kim_tan/4.jpg"
     ]
   },
   {
@@ -75,7 +74,11 @@ export const featuredProjects: FeaturedProject[] = [
     value: "2.750.000.000 VNĐ",
     valueNumber: 2750000000,
     pillar: "renewable",
-    images: ["/images/projects/cho-thuan-thanh-exterior.jpg"]
+    images: [
+      "/images/projects/cho_thuan_thanh/1.jpg",
+      "/images/projects/cho_thuan_thanh/2.jpg",
+      "/images/projects/cho_thuan_thanh/3.jpg"
+    ]
   },
   {
     name: "Điện mặt trời mái nhà - Hợp tác đầu tư",
@@ -86,8 +89,10 @@ export const featuredProjects: FeaturedProject[] = [
     valueNumber: 1800000000,
     pillar: "renewable",
     images: [
-      "/images/projects/cho-nga-tu-dau-exterior.jpg",
-      "/images/projects/cho-nga-tu-dau-rooftop-aerial-01.jpg"
+      "/images/projects/nga_tu_dau/1.jpg",
+      "/images/projects/nga_tu_dau/2.jpg",
+      "/images/projects/nga_tu_dau/3.jpg",
+      "/images/projects/nga_tu_dau/4.jpg"
     ]
   },
   {
