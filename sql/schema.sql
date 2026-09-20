@@ -32,6 +32,7 @@ CREATE TABLE products (
     price VARCHAR(50) NOT NULL,
     image_url TEXT,
     brand VARCHAR(100) NOT NULL,
+    specifications JSON NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
     INDEX idx_products_category (category_id),

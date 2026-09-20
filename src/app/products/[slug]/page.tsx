@@ -93,6 +93,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
               ))}
             </div>
 
+            {product.specifications && product.specifications.length > 0 && (
+              <div className="mt-4">
+                <h2 className="mb-6 text-xl font-bold tracking-tight text-[var(--ink)]">Thông số kỹ thuật</h2>
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  {product.specifications.map((spec, index) => (
+                    <div key={index} className="flex flex-col gap-1 rounded-xl border border-[var(--line)] bg-white/50 p-4 transition-colors hover:bg-[var(--canvas)] dark:bg-[var(--canvas)] dark:hover:bg-white/5">
+                      <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--ink-muted)]">{spec.label}</dt>
+                      <dd className="font-semibold text-[var(--ink)]">{spec.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
+
             <Link className="button-primary w-fit" href="/contact">
               Tư vấn sản phẩm
             </Link>

@@ -22,8 +22,8 @@ export type Product = {
   imageAlt: string;
   application: string;
   profileTitle: string;
-  strengthsTitle?: string;
   strengths?: string[];
+  specifications?: { label: string; value: string }[];
   models: ProductModel[];
   category: ProductCategory;
   price: string;

@@ -13,6 +13,7 @@ type ProductRow = RowDataPacket & {
   price: string | null;
   image_url: string | null;
   brand: string | null;
+  specifications: string | any | null;
 };
 
 const PRODUCT_FIELDS = `
@@ -22,7 +23,8 @@ const PRODUCT_FIELDS = `
   p.name,
   p.price,
   p.image_url,
-  p.brand
+  p.brand,
+  p.specifications
 `;
 
 const LIST_PRODUCTS_QUERY = `
@@ -68,6 +70,17 @@ function formatPrice(value: string | null) {
   return trimmed;
 }
 
+function generateMockSpecifications(title: string) {
+  return [
+    { label: "Model", value: title },
+    { label: "Công suất", value: "545 Wp – 550 Wp" },
+    { label: "Hiệu suất", value: "20.9%" },
+    { label: "Kích thước", value: "2256mm x 1133mm x 35mm" },
+    { label: "Bảo hành sản phẩm", value: "12 năm" },
+    { label: "Bảo hành hiệu suất", value: "25 năm" },
+  ];
+}
+
 function mapProductRow(row: ProductRow): Product {
   const category = {
     id: row.category_id ?? 0,
@@ -76,6 +89,22 @@ function mapProductRow(row: ProductRow): Product {
   const brand = row.brand?.trim() || "TIS";
   const title = row.name.trim();
   const image = toProductImageUrl(row.image_url);
+
+  let parsedSpecs = [];
+  try {
+    if (row.specifications) {
+      parsedSpecs = typeof row.specifications === "string" 
+        ? JSON.parse(row.specifications) 
+        : row.specifications;
+    }
+  } catch (error) {
+    // Fallback to empty if parse fails
+  }
+
+  // Tạm thời nếu DB chưa có dữ liệu cho sản phẩm này, chúng ta vẫn dùng mock data
+  if (!parsedSpecs || parsedSpecs.length === 0) {
+    parsedSpecs = generateMockSpecifications(title);
+  }
 
   return {
     id: row.id,
@@ -98,7 +127,8 @@ function mapProductRow(row: ProductRow): Product {
     ],
     category,
     price: formatPrice(row.price),
-    brand
+    brand,
+    specifications: parsedSpecs
   };
 }
 
