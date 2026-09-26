@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function ProjectsPage() {
-  const { projects, usedFallback } = await getProjects();
+  const { projects, usedFallback, errorMessage } = await getProjects();
 
   return (
     <main>
@@ -31,11 +31,11 @@ export default async function ProjectsPage() {
 
       {usedFallback ? (
         <p className="site-shell pt-2 text-sm text-[var(--ink-muted)]">
-          Đang dùng dữ liệu mẫu trên website. Chạy file{" "}
-          <code className="rounded bg-[var(--surface-muted)] px-1.5 py-0.5 text-xs">sql/projects.schema.sql</code> trên MySQL
-          để quản lý dự án và album ảnh từ database.
+          Đang dùng dữ liệu mẫu dành cho môi trường phát triển.
         </p>
       ) : null}
+
+      {errorMessage ? <p className="site-shell pt-4 text-sm text-red-700" role="alert">{errorMessage}</p> : null}
 
       <ProjectsGrid projects={projects} />
     </main>

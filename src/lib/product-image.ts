@@ -30,9 +30,12 @@ function resolveLocalExtension(segments: string[]) {
 
 export function toProductImageUrl(value: string | null | undefined) {
   const rawValue = value?.trim();
-  if (!rawValue || /^https?:\/\//i.test(rawValue)) {
+  if (!rawValue) {
     return PRODUCT_FALLBACK_IMAGE;
   }
+
+  if (/^https:\/\//i.test(rawValue)) return rawValue;
+  if (/^http:\/\//i.test(rawValue)) return PRODUCT_FALLBACK_IMAGE;
 
   const normalized = rawValue.replaceAll("\\", "/").replace(/^\/+/, "");
   if (normalized.startsWith("images/")) {

@@ -217,7 +217,7 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
     (p) => selectedCategory === "all" || p.pillar === selectedCategory
   );
 
-  const sortedProjects = [...filteredProjects].sort((a, b) => b.valueNumber - a.valueNumber);
+  const sortedProjects = filteredProjects;
 
   return (
     <section className="site-shell section-space pt-0">
@@ -252,12 +252,13 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
             return (
               <article
                 key={project.id}
-                className="content-panel reveal grid gap-4"
+                className={`content-panel reveal grid gap-4 ${project.isHighlight ? "lg:col-span-2" : ""}`}
                 style={{ gridTemplateRows: 'subgrid', gridRow: 'span 5' }}
               >
                 {/* Row 1: Badge */}
                 <div className="flex flex-wrap gap-2 items-center">
                   <CategoryBadge pillar={project.pillar} />
+                  {project.isHighlight ? <span className="badge-category">Nổi bật</span> : null}
                 </div>
 
                 {/* Row 2: Title */}

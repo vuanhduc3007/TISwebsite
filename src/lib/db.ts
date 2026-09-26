@@ -29,6 +29,8 @@ export function getDatabasePool() {
   const password = process.env.MYSQL_PASSWORD ?? "";
   const database = getRequiredEnv("MYSQL_DATABASE");
   const parsedPort = Number(process.env.MYSQL_PORT ?? "3306");
+  const useTls = process.env.MYSQL_SSL === "true";
+  const sslCa = process.env.MYSQL_SSL_CA?.replaceAll("\\n", "\n").trim();
 
   if (!Number.isInteger(parsedPort) || parsedPort < 1 || parsedPort > 65535) {
     throw new DatabaseConfigurationError("MYSQL_PORT must be a valid TCP port.");
@@ -43,7 +45,8 @@ export function getDatabasePool() {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    charset: "utf8mb4"
+    charset: "utf8mb4",
+    ...(useTls ? { ssl: { rejectUnauthorized: true, ...(sslCa ? { ca: sslCa } : {}) } } : {})
   });
 
   return pool;

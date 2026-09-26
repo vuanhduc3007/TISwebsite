@@ -7,38 +7,57 @@ import type { Product } from "@/lib/products-contract";
 
 type ProductRow = RowDataPacket & {
   id: number;
+  slug: string;
   category_id: number | null;
   category_name: string | null;
   name: string;
   price: string | null;
+  price_amount: number | null;
+  price_label: string | null;
   image_url: string | null;
   brand: string | null;
   specifications: string | any | null;
+  description: string | null;
+  image_alt: string | null;
 };
 
 const PRODUCT_FIELDS = `
   p.id,
+  p.slug,
   p.category_id,
   c.name AS category_name,
   p.name,
   p.price,
+  p.price_amount,
+  p.price_label,
   p.image_url,
   p.brand,
-  p.specifications
+  p.specifications,
+  p.description,
+  p.image_alt
 `;
 
 const LIST_PRODUCTS_QUERY = `
   SELECT ${PRODUCT_FIELDS}
   FROM products AS p
   LEFT JOIN categories AS c ON c.id = p.category_id
-  ORDER BY p.category_id ASC, p.id ASC
+  WHERE p.status = 'published' AND p.deleted_at IS NULL AND (c.is_active = 1 OR c.id IS NULL)
+  ORDER BY p.sort_order ASC, p.id ASC
 `;
 
 const PRODUCT_BY_ID_QUERY = `
   SELECT ${PRODUCT_FIELDS}
   FROM products AS p
   LEFT JOIN categories AS c ON c.id = p.category_id
-  WHERE p.id = ?
+  WHERE p.id = ? AND p.status = 'published' AND p.deleted_at IS NULL
+  LIMIT 1
+`;
+
+const PRODUCT_BY_SLUG_QUERY = `
+  SELECT ${PRODUCT_FIELDS}
+  FROM products AS p
+  LEFT JOIN categories AS c ON c.id = p.category_id
+  WHERE p.slug = ? AND p.status = 'published' AND p.deleted_at IS NULL
   LIMIT 1
 `;
 
@@ -70,17 +89,6 @@ function formatPrice(value: string | null) {
   return trimmed;
 }
 
-function generateMockSpecifications(title: string) {
-  return [
-    { label: "Model", value: title },
-    { label: "Công suất", value: "545 Wp – 550 Wp" },
-    { label: "Hiệu suất", value: "20.9%" },
-    { label: "Kích thước", value: "2256mm x 1133mm x 35mm" },
-    { label: "Bảo hành sản phẩm", value: "12 năm" },
-    { label: "Bảo hành hiệu suất", value: "25 năm" },
-  ];
-}
-
 function mapProductRow(row: ProductRow): Product {
   const category = {
     id: row.category_id ?? 0,
@@ -101,20 +109,22 @@ function mapProductRow(row: ProductRow): Product {
     // Fallback to empty if parse fails
   }
 
-  // Tạm thời nếu DB chưa có dữ liệu cho sản phẩm này, chúng ta vẫn dùng mock data
-  if (!parsedSpecs || parsedSpecs.length === 0) {
-    parsedSpecs = generateMockSpecifications(title);
-  }
+  if (!Array.isArray(parsedSpecs)) parsedSpecs = [];
+
+  const price = row.price_amount !== null
+    ? formatPrice(String(row.price_amount))
+    : row.price_label?.trim() || formatPrice(row.price);
+  const description = row.description?.split(/\n\s*\n/).map((item) => item.trim()).filter(Boolean) ?? [];
 
   return {
     id: row.id,
-    slug: createProductSlug(title, row.id),
+    slug: row.slug,
     title,
     shortTitle: title,
     summary: `${brand} · ${category.name}`,
-    description: [`Giá tham khảo: ${formatPrice(row.price)}`],
+    description,
     image,
-    imageAlt: `${title}${brand ? ` - ${brand}` : ""}`,
+    imageAlt: row.image_alt?.trim() || `${title}${brand ? ` - ${brand}` : ""}`,
     application: category.name,
     profileTitle: title,
     models: [
@@ -126,7 +136,7 @@ function mapProductRow(row: ProductRow): Product {
       }
     ],
     category,
-    price: formatPrice(row.price),
+    price,
     brand,
     specifications: parsedSpecs
   };
@@ -143,15 +153,23 @@ export async function getProducts() {
 }
 
 export async function getProductBySlug(slug: string) {
+  const [exactMatch] = await queryProducts(PRODUCT_BY_SLUG_QUERY, [slug]);
+  if (exactMatch) {
+    return exactMatch;
+  }
+
   const idMatch = slug.match(/-(\d+)$/);
   if (!idMatch) {
     return null;
   }
 
   const [product] = await queryProducts(PRODUCT_BY_ID_QUERY, [Number(idMatch[1])]);
-  if (!product || product.slug !== slug) {
+  if (!product) {
     return null;
   }
+
+  const legacySlug = createProductSlug(product.title, product.id);
+  if (legacySlug !== slug) return null;
 
   return product;
 }

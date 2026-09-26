@@ -1,3 +1,5 @@
+-- DEPRECATED: historical seed only. Do not use for production migration.
+-- Use sql/migrations/001_admin_cms.sql for the Admin CMS additive migration.
 -- Projects list + gallery images (run against MYSQL_DATABASE used by the website)
 
 CREATE TABLE IF NOT EXISTS projects (

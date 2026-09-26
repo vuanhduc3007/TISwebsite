@@ -38,7 +38,7 @@ const LIST_PROJECTS_QUERY = `
     date_display,
     is_highlight
   FROM projects
-  WHERE status = 'published'
+  WHERE status = 'published' AND deleted_at IS NULL
   ORDER BY sort_order ASC, contract_value_vnd DESC, id DESC
 `;
 
@@ -51,7 +51,7 @@ const LIST_PROJECT_IMAGES_QUERY = `
     pi.sort_order
   FROM project_images AS pi
   INNER JOIN projects AS p ON p.id = pi.project_id
-  WHERE p.status = 'published'
+  WHERE p.status = 'published' AND p.deleted_at IS NULL
   ORDER BY pi.project_id ASC, pi.sort_order ASC, pi.id ASC
 `;
 
@@ -192,17 +192,16 @@ async function queryProjectsFromDatabase() {
   });
 }
 
-export async function getProjects(): Promise<{ projects: Project[]; usedFallback: boolean }> {
+export async function getProjects(): Promise<{ projects: Project[]; usedFallback: boolean; errorMessage?: string }> {
   try {
     const projects = await queryProjectsFromDatabase();
-    if (projects.length) {
-      return { projects, usedFallback: false };
+    return { projects, usedFallback: false };
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production" && process.env.PROJECTS_STATIC_FALLBACK === "true") {
+      return { projects: mapStaticProjects(), usedFallback: true };
     }
-  } catch {
-    // Fall back to bundled project data when MySQL is unavailable or tables are empty.
+    return { projects: [], usedFallback: false, errorMessage: getProjectRepositoryErrorMessage(error) };
   }
-
-  return { projects: mapStaticProjects(), usedFallback: true };
 }
 
 export function getProjectRepositoryErrorMessage(error: unknown) {
