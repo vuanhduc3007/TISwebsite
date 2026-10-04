@@ -11,6 +11,8 @@
     "db:preflight:admin": "node scripts/preflight-admin-cms.mjs",
     "db:migrate:admin": "node scripts/migrate-admin-cms.mjs",
     "admin:create": "node scripts/create-admin.mjs",
+    "admin:recover-owner": "node --conditions=react-server --experimental-strip-types scripts/reset-owner-password.mjs",
+    "test:admin-recovery": "node --conditions=react-server --experimental-strip-types --test tests/admin-password-recovery.test.mjs",
     "media:e2e": "node --conditions=react-server --experimental-strip-types scripts/cloudinary-e2e.mjs",
     "media:db-e2e": "node --conditions=react-server --experimental-strip-types scripts/cloudinary-db-e2e.mjs",
     "media:preflight:test": "node scripts/preflight-cloudinary-test.mjs",

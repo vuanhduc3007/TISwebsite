@@ -12,6 +12,26 @@
 
 Do not use `npm run db:init` in production. It drops and reseeds content tables.
 
+## One-time owner password recovery
+
+If the sole production owner loses their password and has no valid owner session, the
+authenticated `/admin/users` password update cannot be used. `admin:create` is
+bootstrap-only and must not be rerun. The guarded recovery command is
+`npm run admin:recover-owner`; it must be run only at a separately approved
+production recovery checkpoint, after verifying the backup and target database.
+
+Set `MYSQL_DATABASE=solar_shop`, `CONFIRM_ADMIN_PASSWORD_RESET=solar_shop`,
+`ADMIN_EMAIL` to the existing active owner's email, and a new 12–256 character
+`ADMIN_RECOVERY_PASSWORD` in a temporary, Git-ignored environment. Never pass
+the password as a CLI argument or put it in source. The command refuses a
+missing/ambiguous owner, missing bootstrap audit or migration, or a second recovery for the same
+owner. It hashes using the application password function, updates the existing
+account, revokes its sessions, and writes `owner_password_recovery` audit in one
+transaction. It prints no password or hash. Remove all three temporary recovery
+variables afterward. Verify the audit, login, and session revocation before
+resuming the rollout. Unit tests run with `npm run test:admin-recovery` and do
+not connect to a database.
+
 ## Required production environment
 
 - Existing `MYSQL_*` and `SMTP_*` variables.

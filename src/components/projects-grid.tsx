@@ -101,7 +101,7 @@ export function ProjectMedia({ title, pillar, images, layout }: ProjectMediaProp
                 src={image.url}
                 alt={image.alt}
                 fill
-                sizes={layout === "featured" ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 33vw, 100vw"}
+                sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-cover"
                 priority={index === 0}
               />
@@ -247,18 +247,17 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
           Chưa có dự án nào thuộc danh mục này.
         </div>
       ) : (
-        <div className="grid gap-x-5 gap-y-8 lg:grid-cols-2" style={{ gridTemplateRows: 'auto' }}>
+        <div className="grid gap-x-6 gap-y-8 grid-cols-1 md:grid-cols-2" style={{ gridTemplateRows: 'auto' }}>
           {sortedProjects.map((project) => {
             return (
               <article
                 key={project.id}
-                className={`content-panel reveal grid gap-4 ${project.isHighlight ? "lg:col-span-2" : ""}`}
+                className="content-panel reveal grid gap-4"
                 style={{ gridTemplateRows: 'subgrid', gridRow: 'span 5' }}
               >
                 {/* Row 1: Badge */}
                 <div className="flex flex-wrap gap-2 items-center">
                   <CategoryBadge pillar={project.pillar} />
-                  {project.isHighlight ? <span className="badge-category">Nổi bật</span> : null}
                 </div>
 
                 {/* Row 2: Title */}
