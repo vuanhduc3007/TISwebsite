@@ -1,12 +1,15 @@
 import "server-only";
 
 import { cache } from "react";
-import { createHmac, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { forbidden, redirect, unauthorized } from "next/navigation";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import type { Pool, PoolConnection } from "mysql2/promise";
 import { getDatabasePool } from "@/lib/db";
+import { getRequestIp } from "@/lib/admin/request";
+import { TrustedProxyError } from "@/lib/admin/client-ip";
+import { hashSessionToken } from "@/lib/admin/secret-hash";
 
 export type AdminRole = "owner" | "editor";
 
@@ -23,11 +26,7 @@ const SESSION_IDLE_MINUTES = 30;
 const COOKIE_NAME = process.env.NODE_ENV === "production" ? "__Host-tis_admin_session" : "tis_admin_session";
 
 function tokenHash(token: string) {
-  const secret = process.env.SESSION_SECRET?.trim();
-  if (process.env.NODE_ENV === "production" && (!secret || secret.length < 32)) {
-    throw new Error("SESSION_SECRET must contain at least 32 characters.");
-  }
-  return createHmac("sha256", secret || "tis-development-session-only").update(token).digest("hex");
+  return hashSessionToken(token, process.env);
 }
 
 export type NewAdminSession = { token: string; expiresAt: Date };
@@ -108,6 +107,12 @@ export async function requireAdmin(roles: AdminRole[] = ["owner", "editor"]) {
 }
 
 export async function requireAdminForMutation(roles: AdminRole[] = ["owner", "editor"]) {
+  try {
+    await getRequestIp();
+  } catch (error) {
+    if (error instanceof TrustedProxyError && error.status === 403) forbidden();
+    throw error;
+  }
   const user = await getAdminSession();
   if (!user) unauthorized();
   if (!roles.includes(user.role)) forbidden();

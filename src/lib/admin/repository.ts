@@ -50,7 +50,7 @@ export type AdminProject = RowDataPacket & {
   pillar: "it" | "me" | "renewable";
   location: string | null;
   contract_value_vnd: number;
-  contract_date: string | Date | null;
+  contract_date: string | null;
   date_display: string | null;
   is_highlight: number;
   sort_order: number;

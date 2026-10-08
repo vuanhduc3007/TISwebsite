@@ -9,6 +9,8 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https://res.cloudinary.com",
   "font-src 'self' data:",
   "connect-src 'self'",
+  // Exact origin of the existing footer iframe; do not open arbitrary frames.
+  "frame-src https://maps.google.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -19,6 +21,7 @@ const contentSecurityPolicy = [
 const securityHeaders = [
   { key: "Content-Security-Policy", value: contentSecurityPolicy },
   { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
@@ -39,7 +42,11 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "20mb" }
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      { source: "/admin/:path*", headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }] },
+      { source: "/api/contact", headers: [{ key: "Cache-Control", value: "no-store" }] }
+    ];
   }
 };
 

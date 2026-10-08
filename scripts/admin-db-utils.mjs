@@ -3,15 +3,25 @@ import path from "node:path";
 
 export const MIGRATION_VERSION = "001_admin_cms";
 
-export function loadEnvFile(fileName, { override = false } = {}) {
+function readEnvValues(fileName) {
   const envPath = path.resolve(process.cwd(), fileName);
-  if (!fs.existsSync(envPath)) return false;
+  if (!fs.existsSync(envPath)) return null;
+  const values = [];
   for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
     const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=(.*)$/);
-    if (!match || (!override && process.env[match[1]])) continue;
+    if (!match) continue;
     let value = match[2].trim();
     if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
-    process.env[match[1]] = value;
+    values.push([match[1], value]);
+  }
+  return values;
+}
+
+export function loadEnvFile(fileName, { override = false } = {}) {
+  const values = readEnvValues(fileName);
+  if (!values) return false;
+  for (const [key, value] of values) {
+    if (override || !process.env[key]) process.env[key] = value;
   }
   return true;
 }
@@ -22,20 +32,35 @@ export function loadEnvLocal() {
 
 export function loadCloudinaryTestEnv() {
   loadEnvLocal();
-  if (!loadEnvFile(".env.cloudinary-test.local", { override: true })) {
-    throw new Error("Cloudinary test environment file is missing.");
+  // Validate file-owned TEST values before applying them. Missing test credentials
+  // must NEVER fall back to values inherited from .env.local/the parent process.
+  const values = readEnvValues(".env.cloudinary-test.local");
+  if (!values) throw new Error("Cloudinary test environment file is missing.");
+  const testEnv = Object.fromEntries(values);
+  for (const key of ["MYSQL_DATABASE", "MEDIA_PROVIDER", "MEDIA_STORAGE_PREFIX", "CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"]) {
+    if (!testEnv[key]?.trim()) throw new Error(`Refusing test: ${key} must be configured explicitly in the test file.`);
   }
-  if (process.env.MYSQL_DATABASE !== "solar_shop_admin_test") {
+  if (testEnv.MYSQL_DATABASE !== "solar_shop_admin_test") {
     throw new Error("Refusing test: MYSQL_DATABASE must be solar_shop_admin_test.");
   }
-  if (process.env.MEDIA_PROVIDER !== "cloudinary"
-    || !/^tiscms-e2e-test(?:[a-z0-9/_-]*)$/.test(process.env.MEDIA_STORAGE_PREFIX ?? "")
-    || (process.env.MEDIA_STORAGE_PREFIX ?? "").includes("..")) {
+  if (testEnv.MEDIA_PROVIDER !== "cloudinary"
+    || !/^tiscms-e2e-test(?:[a-z0-9/_-]*)$/.test(testEnv.MEDIA_STORAGE_PREFIX)
+    || testEnv.MEDIA_STORAGE_PREFIX.includes("..")) {
     throw new Error("Refusing test: Cloudinary provider or test namespace is invalid.");
   }
-  for (const key of ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"]) {
-    if (!process.env[key]?.trim()) throw new Error(`Refusing test: ${key} is missing.`);
+  if (testEnv.CLOUDINARY_API_KEY === testEnv.CLOUDINARY_API_SECRET) {
+    throw new Error("Refusing test: Cloudinary API key and secret must differ.");
   }
+  const localEnv = Object.fromEntries(readEnvValues(".env.local") ?? []);
+  const productionSources = [localEnv, ...(process.env.MYSQL_DATABASE === "solar_shop" ? [process.env] : [])];
+  for (const production of productionSources) {
+    if ((production.CLOUDINARY_API_KEY?.trim() && production.CLOUDINARY_API_KEY.trim() === testEnv.CLOUDINARY_API_KEY.trim())
+      || (production.CLOUDINARY_API_SECRET?.trim() && production.CLOUDINARY_API_SECRET.trim() === testEnv.CLOUDINARY_API_SECRET.trim())) {
+      throw new Error("Refusing test: Cloudinary TEST credentials must not reuse production credentials.");
+    }
+  }
+  // Apply the exact validated snapshot, not a second potentially changed read.
+  for (const [key, value] of values) process.env[key] = value;
 }
 
 export function getDatabaseConfig(options = {}) {

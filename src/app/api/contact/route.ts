@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { consumeRateLimit } from "@/lib/admin/rate-limit";
 import { getRequestIp } from "@/lib/admin/request";
+import { TrustedProxyError } from "@/lib/admin/client-ip";
+import { getSmtpConfiguration } from "@/lib/smtp-config";
 
 const MAX_BODY_BYTES = 20_000;
 
@@ -70,25 +72,8 @@ export async function POST(request: Request) {
     }
 
     // --- Configure transporter ---
-    const smtpHost = process.env.SMTP_HOST?.trim();
-    const smtpUser = process.env.SMTP_USER?.trim();
-    const smtpPass = process.env.SMTP_PASS;
-    const contactEmail = process.env.CONTACT_EMAIL?.trim() || smtpUser;
-    const smtpPort = Number(process.env.SMTP_PORT ?? 587);
-    const configuredEmailPattern = /^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/;
-    if (!smtpHost || !smtpUser || !smtpPass || !contactEmail || !configuredEmailPattern.test(smtpUser) || !configuredEmailPattern.test(contactEmail)
-      || !Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65_535) {
-      throw new Error("SMTP configuration is incomplete.");
-    }
-    const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: process.env.SMTP_SECURE === "true" || smtpPort === 465,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-    });
+    const smtp = getSmtpConfiguration(process.env);
+    const transporter = nodemailer.createTransport(smtp.transport);
 
     // --- Build email ---
     const safeName = name.replace(/[\r\n]+/g, " ");
@@ -128,9 +113,9 @@ export async function POST(request: Request) {
 
     // --- Send ---
     await transporter.sendMail({
-      from: `"TIS Website" <${smtpUser}>`,
-      to: contactEmail,
-      replyTo: "noreply@tis.vn",
+      from: { name: "TIS Website", address: smtp.from },
+      to: smtp.to,
+      replyTo: smtp.replyTo,
       subject,
       text,
       html,
@@ -138,6 +123,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
+    if (err instanceof TrustedProxyError) {
+      return NextResponse.json({ error: "Kết nối gửi yêu cầu không hợp lệ hoặc dịch vụ chưa sẵn sàng." }, { status: err.status });
+    }
     if (err instanceof RequestBodyError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }

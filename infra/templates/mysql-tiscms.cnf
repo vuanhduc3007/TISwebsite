@@ -1,0 +1,10 @@
+# TEMPLATE ONLY. Review version/existing settings before installation/restart.
+# Suggested Ubuntu location: /etc/mysql/mysql.conf.d/90-tiscms-network.cnf
+[mysqld]
+bind-address=127.0.0.1
+port=3306
+# The application uses classic protocol only. Close the extra 33060 listener.
+mysqlx=OFF
+# Do not change lower_case_table_names on an initialized datadir.
+# Do not change legacy table collations or reinterpret timestamps during import.
+# Set default-time-zone only after comparing legacy global/session/client timezone.

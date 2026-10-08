@@ -3,6 +3,7 @@ import "server-only";
 import type { RowDataPacket } from "mysql2";
 import { featuredProjects } from "@/content/projects-data";
 import { DatabaseConfigurationError, getDatabasePool } from "@/lib/db";
+import { formatProjectCalendarDate } from "@/lib/calendar-date";
 import { resolveProjectImages, toProjectImageUrl } from "@/lib/project-image";
 import type { Project, ProjectImage } from "@/lib/projects-contract";
 
@@ -13,7 +14,7 @@ type ProjectRow = RowDataPacket & {
   pillar: "it" | "me" | "renewable";
   location: string | null;
   contract_value_vnd: number;
-  contract_date: Date | string | null;
+  contract_date: string | null;
   date_display: string | null;
   is_highlight: number;
 };
@@ -98,24 +99,6 @@ function formatContractValue(value: number) {
   return `${new Intl.NumberFormat("vi-VN").format(value)} VNĐ`;
 }
 
-function formatProjectDate(contractDate: Date | string | null, dateDisplay: string | null) {
-  const display = dateDisplay?.trim();
-  if (display) {
-    return display;
-  }
-
-  if (!contractDate) {
-    return "";
-  }
-
-  const parsed = contractDate instanceof Date ? contractDate : new Date(contractDate);
-  if (Number.isNaN(parsed.getTime())) {
-    return "";
-  }
-
-  return new Intl.DateTimeFormat("vi-VN").format(parsed);
-}
-
 function mapImageRow(row: ProjectImageRow, projectName: string): ProjectImage {
   const caption = row.caption?.trim();
   return {
@@ -137,7 +120,7 @@ function mapProjectRow(row: ProjectRow, images: ProjectImage[]): Project {
     location: row.location?.trim() || undefined,
     valueNumber,
     value: formatContractValue(valueNumber),
-    date: formatProjectDate(row.contract_date, row.date_display),
+    date: formatProjectCalendarDate(row.contract_date, row.date_display),
     isHighlight: Boolean(row.is_highlight),
     images: resolveProjectImages(images, row.pillar, row.name.trim())
   };

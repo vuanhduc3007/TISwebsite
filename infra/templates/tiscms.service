@@ -1,0 +1,47 @@
+# TEMPLATE ONLY. Do not install/start until the next approved checkpoint.
+# /usr/bin/node must be the pinned supported Node executable on the VPS.
+# production.env is UTF-8 without BOM, outside Git, root:root 0600.
+[Unit]
+Description=TIS Next.js application (private origin)
+Wants=network-online.target
+After=network-online.target mysql.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=tiscms
+Group=tiscms
+WorkingDirectory=/srv/tiscms/current
+Environment=NODE_ENV=production
+Environment=NEXT_TELEMETRY_DISABLED=1
+# TZ must be injected in production.env after legacy DB timezone verification.
+EnvironmentFile=/etc/tiscms/production.env
+# EnvironmentFile can override Environment=; force production at exec time too.
+ExecStartPre=/usr/bin/env NODE_ENV=production /usr/bin/node --experimental-strip-types scripts/check-production-config.mjs
+ExecStart=/usr/bin/env NODE_ENV=production /usr/bin/node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3000
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=45s
+KillSignal=SIGTERM
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+# Generated Next cache/ISR outputs need writes. Source/node_modules stay read-only.
+# Validate actual write paths on Linux; do NOT weaken the whole filesystem guard.
+ReadWritePaths=/srv/tiscms/current/.next
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tiscms
+
+[Install]
+WantedBy=multi-user.target

@@ -46,6 +46,9 @@ export function getDatabasePool() {
     connectionLimit: 10,
     queueLimit: 0,
     charset: "utf8mb4",
+    // DATE has no time or timezone. Preserve it for Project forms/display;
+    // DATETIME/TIMESTAMP keep their existing decoding (sessions/audit/etc.).
+    dateStrings: ["DATE"],
     ...(useTls ? { ssl: { rejectUnauthorized: true, ...(sslCa ? { ca: sslCa } : {}) } } : {})
   });
 

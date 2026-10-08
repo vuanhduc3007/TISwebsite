@@ -7,6 +7,7 @@ import { writeAuditLog } from "@/lib/admin/audit";
 import { DUMMY_PASSWORD_HASH, verifyPassword } from "@/lib/admin/password";
 import { consumeRateLimit } from "@/lib/admin/rate-limit";
 import { getRequestIp, hashSensitiveValue } from "@/lib/admin/request";
+import { TrustedProxyError } from "@/lib/admin/client-ip";
 import { createAdminSessionRecord, revokeCurrentSession, setAdminSessionCookie } from "@/lib/admin/session";
 
 export type AuthActionState = { error?: string };
@@ -21,7 +22,13 @@ type UserRow = RowDataPacket & {
 export async function loginAction(_state: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const ip = await getRequestIp();
+  let ip: string;
+  try {
+    ip = await getRequestIp();
+  } catch (error) {
+    if (error instanceof TrustedProxyError) return { error: "Không thể đăng nhập qua kết nối hiện tại. Vui lòng liên hệ quản trị website." };
+    throw error;
+  }
   const genericError = "Email hoặc mật khẩu không đúng.";
   if (!email || email.length > 191 || password.length < 8 || password.length > 256) return { error: genericError };
 
@@ -65,6 +72,7 @@ export async function loginAction(_state: AuthActionState, formData: FormData): 
 }
 
 export async function logoutAction() {
+  await getRequestIp();
   await revokeCurrentSession();
   redirect("/admin/login");
 }
