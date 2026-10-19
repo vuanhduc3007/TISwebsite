@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --conditions=react-server --experimental-strip-types --test tests/*.test.mjs",
     "test:hardening-smoke": "node scripts/hardening-smoke.mjs",
-    "production:config-check": "node --experimental-strip-types scripts/check-production-config.mjs",
+    "production:config-check": "node --conditions=react-server --experimental-strip-types scripts/check-production-config.mjs",
     "db:init": "node scripts/init-db.mjs",
     "db:preflight:admin": "node scripts/preflight-admin-cms.mjs",
     "db:migrate:admin": "node scripts/migrate-admin-cms.mjs",
@@ -27,7 +27,7 @@
     "@fontsource/be-vietnam-pro": "^5.3.0",
     "@tabler/icons-react": "^3.34.1",
     "mysql2": "^3.23.2",
-    "next": "^16.3.6",
+    "next": "16.3.8",
     "nodemailer": "10.0.16",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -38,7 +38,7 @@
     "source-map-js": "1.2.2"
   },
   "engines": {
-    "node": ">=22.20.0"
+    "node": ">=22.23.3 <23"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.14",

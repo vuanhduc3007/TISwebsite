@@ -163,9 +163,10 @@ Required: SMTP_HOST, SMTP_USER, SMTP_PASS. Never generate fake values.
 SMTP_PORT defaults to 587; use SMTP_SECURE=false for verified STARTTLS, or port
 465/SMTP_SECURE=true for implicit TLS. No insecure plaintext fallback.
 
-- SMTP_FROM: verified sender address; defaults to SMTP_USER only if it is an
-  email address. REQUIRED explicitly when SMTP_USER is a provider username.
-- CONTACT_EMAIL: real customer recipient; defaults to the sender address.
+- SMTP_FROM: verified sender address; required explicitly in production. In
+  development it defaults to SMTP_USER if that is an email address.
+- CONTACT_EMAIL: real customer recipient; required explicitly in production.
+  In development it defaults to the sender address.
 - SMTP_REPLY_TO: optional valid address; defaults to the sender address.
 - Configure provider/domain SPF, DKIM and DMARC. Verify SMTP authentication and
   delivery to the customer's mailbox in a separately approved email test.

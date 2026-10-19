@@ -1,44 +1,18 @@
-import fs from "node:fs";
-import path from "node:path";
-import mysql from "mysql2/promise";
+﻿import mysql from "mysql2/promise";
+import { getDisposableMaintenanceConfig, isDirectInvocation, reportMaintenanceFailure } from "./disposable-maintenance.mjs";
 
-async function loadEnvLocal() {
-  const envPath = path.resolve(process.cwd(), ".env.local");
-  if (!fs.existsSync(envPath)) return;
-  const content = fs.readFileSync(envPath, "utf-8");
-  for (const line of content.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const [key, ...valueParts] = trimmed.split("=");
-    if (key && !process.env[key.trim()]) {
-      process.env[key.trim()] = valueParts.join("=").trim();
-    }
-  }
-}
-
-async function alterDatabase() {
-  await loadEnvLocal();
-
-  const host = process.env.MYSQL_HOST || "127.0.0.1";
-  const port = Number(process.env.MYSQL_PORT || "3306");
-  const user = process.env.MYSQL_USER || "root";
-  const password = process.env.MYSQL_PASSWORD || "";
-  const database = process.env.MYSQL_DATABASE || "solar_shop";
-
-  let connection;
+export async function alterDatabase({ env = process.env, args = process.argv.slice(2), connect = mysql.createConnection } = {}) {
+  const config = getDisposableMaintenanceConfig("alter", { env, args });
+  const connection = await connect(config);
   try {
-    connection = await mysql.createConnection({ host, port, user, password, database });
     await connection.query("ALTER TABLE products ADD COLUMN specifications JSON NULL;");
-    console.log("✅ Đã thêm cột specifications vào bảng products thành công!");
+    console.log("Disposable database specifications column added.");
   } catch (error) {
-    if (error.code === 'ER_DUP_FIELDNAME') {
-      console.log("ℹ️ Cột specifications đã tồn tại.");
-    } else {
-      console.error("❌ Lỗi:", error.message);
-    }
+    if (error?.code === "ER_DUP_FIELDNAME") console.log("Disposable database specifications column already exists.");
+    else throw error;
   } finally {
-    if (connection) await connection.end();
+    await connection.end();
   }
 }
 
-alterDatabase();
+if (isDirectInvocation(import.meta.url)) alterDatabase().catch(reportMaintenanceFailure);

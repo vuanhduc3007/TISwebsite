@@ -9,6 +9,11 @@ export function getSmtpConfiguration(env: Environment) {
   const replyTo = env.SMTP_REPLY_TO?.trim() || from;
   const port = Number(env.SMTP_PORT ?? 587);
   const emailPattern = /^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/;
+  // Delivery addresses need an explicit customer-approved value in production;
+  // provider authentication usernames are not a safe recipient default there.
+  if (env.NODE_ENV === "production" && (!env.SMTP_FROM?.trim() || !env.CONTACT_EMAIL?.trim())) {
+    throw new Error("SMTP configuration is incomplete or invalid.");
+  }
   if (!host || /[\s\/\r\n]/.test(host) || !user || !pass || !from || !to || !replyTo
     || ![from, to, replyTo].every(value => value.length <= 254 && emailPattern.test(value))
     || !Number.isInteger(port) || port < 1 || port > 65_535

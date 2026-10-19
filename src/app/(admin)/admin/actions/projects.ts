@@ -5,12 +5,12 @@ import { redirect } from "next/navigation";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { getDatabasePool } from "@/lib/db";
 import { writeAuditLog } from "@/lib/admin/audit";
-import { deleteStoredImage, storeImage } from "@/lib/admin/media";
-import { getAdminProject } from "@/lib/admin/repository";
+import { storeImage } from "@/lib/admin/media";
+import { cleanupDetachedMedia, cleanupUncommittedMedia, MEDIA_OUTCOME_UNKNOWN, MediaTransaction } from "@/lib/admin/media-transaction";
 import { requireAdminForMutation } from "@/lib/admin/session";
 import { AdminValidationError, dateValue, enumValue, friendlyDatabaseError, integerValue, optionalInteger, optionalText, requiredText } from "@/lib/admin/validation";
 
-export type ProjectActionState = { error?: string };
+export type ProjectActionState = { error?: string; errorCode?: "SAVE_OUTCOME_UNKNOWN" };
 
 type ImageInput = { id: number; caption: string | null; altText: string | null; sortOrder: number; remove: boolean };
 const MAX_PROJECT_IMAGES_PER_REQUEST = 10;
@@ -61,26 +61,22 @@ async function uploadProjectFiles(formData: FormData) {
     }
     return stored;
   } catch (error) {
-    await cleanupMedia(stored.map((item) => item.storageKey));
+    await cleanupUncommittedMedia(stored.map((item) => item.storageKey));
     throw error;
   }
-}
-
-async function cleanupMedia(keys: Array<string | null | undefined>) {
-  const results = await Promise.allSettled(keys.filter((key): key is string => Boolean(key)).map(deleteStoredImage));
-  const failures = results.filter((result) => result.status === "rejected").length;
-  if (failures) console.error("[admin media cleanup]", { failures });
 }
 
 export async function createProjectAction(_state: ProjectActionState, formData: FormData): Promise<ProjectActionState> {
   const actor = await requireAdminForMutation();
   const uploaded = [] as Awaited<ReturnType<typeof uploadProjectFiles>>;
   let connection;
+  let transaction: MediaTransaction | undefined;
   let createdId = 0;
   try {
     const input = projectInput(formData);
     uploaded.push(...await uploadProjectFiles(formData));
     connection = await getDatabasePool().getConnection();
+    transaction = new MediaTransaction(connection);
     await connection.beginTransaction();
     const [result] = await connection.execute<ResultSetHeader>(`
       INSERT INTO projects (name, client, pillar, location, contract_value_vnd, contract_date, date_display, is_highlight, sort_order, status)
@@ -92,14 +88,15 @@ export async function createProjectAction(_state: ProjectActionState, formData: 
     }
     createdId = result.insertId;
     await writeAuditLog({ actorUserId: actor.id, actorEmail: actor.email, action: "create", resourceType: "project", resourceId: createdId, details: { name: input.name, status: input.status, images: uploaded.length } }, connection);
-    await connection.commit();
+    await transaction.commit();
   } catch (error) {
-    if (connection) await connection.rollback().catch(() => undefined);
-    await cleanupMedia(uploaded.map((item) => item.storageKey));
+    const canDiscardUploads = transaction ? await transaction.abort() : true;
+    if (canDiscardUploads) await cleanupUncommittedMedia(uploaded.map((item) => item.storageKey));
+    if (!canDiscardUploads) return { ...MEDIA_OUTCOME_UNKNOWN };
     if (error instanceof AdminValidationError) return { error: error.message };
     return { error: friendlyDatabaseError(error) };
   } finally {
-    connection?.release();
+    transaction?.release();
   }
   revalidatePath("/projects");
   redirect(`/admin/projects/${createdId}/edit?created=1`);
@@ -107,45 +104,62 @@ export async function createProjectAction(_state: ProjectActionState, formData: 
 
 export async function updateProjectAction(id: number, _state: ProjectActionState, formData: FormData): Promise<ProjectActionState> {
   const actor = await requireAdminForMutation();
-  const existing = await getAdminProject(id);
-  if (!existing) return { error: "Không tìm thấy dự án." };
   const uploaded = [] as Awaited<ReturnType<typeof uploadProjectFiles>>;
   const deletedStorageKeys: string[] = [];
   let connection;
+  let transaction: MediaTransaction | undefined;
   try {
     const input = projectInput(formData);
     const images = imageInputs(formData.get("existing_images"));
     uploaded.push(...await uploadProjectFiles(formData));
     connection = await getDatabasePool().getConnection();
+    transaction = new MediaTransaction(connection);
     await connection.beginTransaction();
+    // Every album mutation locks the parent first, including hard delete. Read
+    // image membership only after that lock so stale forms cannot delete or
+    // update an image that another save already removed.
+    const [projects] = await connection.execute<RowDataPacket[]>(`SELECT id FROM projects WHERE id=? AND deleted_at IS NULL FOR UPDATE`, [id]);
+    if (!projects[0]) throw new AdminValidationError("Không tìm thấy dự án.");
+    const [currentImages] = await connection.execute<(RowDataPacket & { id: number; storage_key: string | null; sort_order: number })[]>(`
+      SELECT id, storage_key, sort_order FROM project_images WHERE project_id=? FOR UPDATE`, [id]);
     const [updateResult] = await connection.execute<ResultSetHeader>(`UPDATE projects SET name=?, client=?, pillar=?, location=?, contract_value_vnd=?, contract_date=?, date_display=?, is_highlight=?, sort_order=?, status=? WHERE id=? AND deleted_at IS NULL`, [input.name, input.client, input.pillar, input.location, input.contractValue, input.contractDate, input.dateDisplay, input.isHighlight, input.sortOrder, input.status, id]);
     if (updateResult.affectedRows !== 1) throw new AdminValidationError("Không tìm thấy dự án.");
-    const ownedIds = new Set((existing.images ?? []).map((image) => image.id));
+    const ownedImages = new Map(currentImages.map((image) => [image.id, image]));
     for (const image of images) {
-      if (!ownedIds.has(image.id)) throw new AdminValidationError("Ảnh không thuộc dự án này.");
+      const original = ownedImages.get(image.id);
+      if (!original) throw new AdminValidationError("Danh sách ảnh đã thay đổi hoặc ảnh không thuộc dự án này. Hãy tải lại trang trước khi lưu.");
       if (image.remove) {
-        const original = existing.images?.find((item) => item.id === image.id);
-        if (original?.storage_key) deletedStorageKeys.push(original.storage_key);
-        await connection.execute(`DELETE FROM project_images WHERE id=? AND project_id=?`, [image.id, id]);
+        const [deleted] = await connection.execute<ResultSetHeader>(`DELETE FROM project_images WHERE id=? AND project_id=?`, [image.id, id]);
+        if (deleted.affectedRows !== 1) throw new AdminValidationError("Danh sách ảnh đã thay đổi. Hãy tải lại trang trước khi lưu.");
+        if (original.storage_key) deletedStorageKeys.push(original.storage_key);
       } else {
-        await connection.execute(`UPDATE project_images SET caption=?, alt_text=?, sort_order=? WHERE id=? AND project_id=?`, [image.caption, image.altText, image.sortOrder, image.id, id]);
+        const [updated] = await connection.execute<ResultSetHeader>(`UPDATE project_images SET caption=?, alt_text=?, sort_order=? WHERE id=? AND project_id=?`, [image.caption, image.altText, image.sortOrder, image.id, id]);
+        if (updated.affectedRows !== 1) throw new AdminValidationError("Danh sách ảnh đã thay đổi. Hãy tải lại trang trước khi lưu.");
       }
     }
-    const startOrder = images.filter((image) => !image.remove).length;
+    // A stale form may omit images another editor just added. Keep those rows
+    // and append new uploads after both their current and the submitted order.
+    const submitted = new Map(images.map((image) => [image.id, image]));
+    const lastOrder = currentImages.reduce((maximum, image) => {
+      const input = submitted.get(image.id);
+      return input?.remove ? maximum : Math.max(maximum, input?.sortOrder ?? image.sort_order);
+    }, -1);
+    const startOrder = lastOrder + 1;
     for (const [index, media] of uploaded.entries()) {
       await connection.execute(`INSERT INTO project_images (project_id, image_url, storage_key, mime_type, file_size, width, height, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [id, media.url, media.storageKey, media.mimeType, media.fileSize, media.width, media.height, startOrder + index]);
     }
     await writeAuditLog({ actorUserId: actor.id, actorEmail: actor.email, action: "update", resourceType: "project", resourceId: id, details: { name: input.name, status: input.status, uploaded: uploaded.length, removed: deletedStorageKeys.length } }, connection);
-    await connection.commit();
+    await transaction.commit();
   } catch (error) {
-    if (connection) await connection.rollback().catch(() => undefined);
-    await cleanupMedia(uploaded.map((item) => item.storageKey));
+    const canDiscardUploads = transaction ? await transaction.abort() : true;
+    if (canDiscardUploads) await cleanupUncommittedMedia(uploaded.map((item) => item.storageKey));
+    if (!canDiscardUploads) return { ...MEDIA_OUTCOME_UNKNOWN };
     if (error instanceof AdminValidationError) return { error: error.message };
     return { error: friendlyDatabaseError(error) };
   } finally {
-    connection?.release();
+    transaction?.release();
   }
-  await cleanupMedia(deletedStorageKeys);
+  await cleanupDetachedMedia(deletedStorageKeys);
   revalidatePath("/projects");
   redirect(`/admin/projects/${id}/edit?saved=1`);
 }
@@ -153,17 +167,18 @@ export async function updateProjectAction(id: number, _state: ProjectActionState
 export async function softDeleteProjectAction(id: number) {
   const actor = await requireAdminForMutation();
   const connection = await getDatabasePool().getConnection();
+  const transaction = new MediaTransaction(connection);
   try {
     await connection.beginTransaction();
     const [result] = await connection.execute<ResultSetHeader>(`UPDATE projects SET deleted_at=CURRENT_TIMESTAMP, status='draft' WHERE id=? AND deleted_at IS NULL`, [id]);
     if (result.affectedRows !== 1) throw new Error("NOT_FOUND");
     await writeAuditLog({ actorUserId: actor.id, actorEmail: actor.email, action: "soft_delete", resourceType: "project", resourceId: id }, connection);
-    await connection.commit();
+    await transaction.commit();
   } catch (error) {
-    await connection.rollback().catch(() => undefined);
+    if (!await transaction.abort()) throw new Error(MEDIA_OUTCOME_UNKNOWN.error);
     throw error;
   } finally {
-    connection.release();
+    transaction.release();
   }
   revalidatePath("/projects");
   revalidatePath("/admin/projects");
@@ -173,23 +188,25 @@ export async function softDeleteProjectAction(id: number) {
 export async function hardDeleteProjectAction(id: number) {
   const actor = await requireAdminForMutation(["owner"]);
   const connection = await getDatabasePool().getConnection();
+  const transaction = new MediaTransaction(connection);
   let storageKeys: Array<string | null> = [];
   try {
     await connection.beginTransaction();
     const [projectRows] = await connection.execute<(RowDataPacket & { id: number })[]>(`SELECT id FROM projects WHERE id=? FOR UPDATE`, [id]);
     if (!projectRows[0]) throw new Error("NOT_FOUND");
-    const [rows] = await connection.execute<(RowDataPacket & { storage_key: string | null })[]>(`SELECT storage_key FROM project_images WHERE project_id=?`, [id]);
+    const [rows] = await connection.execute<(RowDataPacket & { storage_key: string | null })[]>(`SELECT storage_key FROM project_images WHERE project_id=? FOR UPDATE`, [id]);
     storageKeys = rows.map((row) => row.storage_key);
-    await connection.execute(`DELETE FROM projects WHERE id=?`, [id]);
+    const [deleted] = await connection.execute<ResultSetHeader>(`DELETE FROM projects WHERE id=?`, [id]);
+    if (deleted.affectedRows !== 1) throw new Error("NOT_FOUND");
     await writeAuditLog({ actorUserId: actor.id, actorEmail: actor.email, action: "hard_delete", resourceType: "project", resourceId: id }, connection);
-    await connection.commit();
+    await transaction.commit();
   } catch (error) {
-    await connection.rollback().catch(() => undefined);
+    if (!await transaction.abort()) throw new Error(MEDIA_OUTCOME_UNKNOWN.error);
     throw error;
   } finally {
-    connection.release();
+    transaction.release();
   }
-  await cleanupMedia(storageKeys);
+  await cleanupDetachedMedia(storageKeys);
   revalidatePath("/projects");
   revalidatePath("/admin/projects");
   redirect("/admin/projects?deleted=1");

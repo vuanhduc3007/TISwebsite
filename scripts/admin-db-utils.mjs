@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { getIsolatedDatabaseConfig } from "./disposable-maintenance.mjs";
 
 export const MIGRATION_VERSION = "001_admin_cms";
 
@@ -31,18 +32,15 @@ export function loadEnvLocal() {
 }
 
 export function loadCloudinaryTestEnv() {
-  loadEnvLocal();
-  // Validate file-owned TEST values before applying them. Missing test credentials
-  // must NEVER fall back to values inherited from .env.local/the parent process.
+  // Read .env.local only for credential-reuse comparisons, never import it. The
+  // test snapshot must be complete before any DB/provider caller can proceed.
   const values = readEnvValues(".env.cloudinary-test.local");
   if (!values) throw new Error("Cloudinary test environment file is missing.");
   const testEnv = Object.fromEntries(values);
-  for (const key of ["MYSQL_DATABASE", "MEDIA_PROVIDER", "MEDIA_STORAGE_PREFIX", "CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"]) {
+  for (const key of ["MYSQL_HOST", "MYSQL_PORT", "MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_DATABASE", "MYSQL_SSL", "MEDIA_PROVIDER", "MEDIA_STORAGE_PREFIX", "CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"]) {
     if (!testEnv[key]?.trim()) throw new Error(`Refusing test: ${key} must be configured explicitly in the test file.`);
   }
-  if (testEnv.MYSQL_DATABASE !== "solar_shop_admin_test") {
-    throw new Error("Refusing test: MYSQL_DATABASE must be solar_shop_admin_test.");
-  }
+  getIsolatedDatabaseConfig(testEnv, { database: /^solar_shop_admin_test$/, userPattern: /^tiscms_test(?:_[a-z0-9_]{1,20})?$/ });
   if (testEnv.MEDIA_PROVIDER !== "cloudinary"
     || !/^tiscms-e2e-test(?:[a-z0-9/_-]*)$/.test(testEnv.MEDIA_STORAGE_PREFIX)
     || testEnv.MEDIA_STORAGE_PREFIX.includes("..")) {
@@ -51,15 +49,28 @@ export function loadCloudinaryTestEnv() {
   if (testEnv.CLOUDINARY_API_KEY === testEnv.CLOUDINARY_API_SECRET) {
     throw new Error("Refusing test: Cloudinary API key and secret must differ.");
   }
+  if (!/^[a-z0-9_-]+$/.test(testEnv.CLOUDINARY_CLOUD_NAME)) throw new Error("Refusing test: Cloudinary cloud name is invalid.");
   const localEnv = Object.fromEntries(readEnvValues(".env.local") ?? []);
-  const productionSources = [localEnv, ...(process.env.MYSQL_DATABASE === "solar_shop" ? [process.env] : [])];
+  const inheritedIsSameTest = ["MYSQL_HOST", "MYSQL_PORT", "MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_DATABASE", "MYSQL_SSL", "MEDIA_PROVIDER", "MEDIA_STORAGE_PREFIX", "CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"]
+    .every(key => process.env[key] === testEnv[key]);
+  const productionSources = [localEnv, ...(inheritedIsSameTest ? [] : [process.env])];
   for (const production of productionSources) {
-    if ((production.CLOUDINARY_API_KEY?.trim() && production.CLOUDINARY_API_KEY.trim() === testEnv.CLOUDINARY_API_KEY.trim())
-      || (production.CLOUDINARY_API_SECRET?.trim() && production.CLOUDINARY_API_SECRET.trim() === testEnv.CLOUDINARY_API_SECRET.trim())) {
-      throw new Error("Refusing test: Cloudinary TEST credentials must not reuse production credentials.");
+    for (const key of ["MYSQL_USER", "MYSQL_PASSWORD", "CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"]) {
+      if (production[key]?.trim() && production[key].trim() === testEnv[key].trim()) {
+        throw new Error(`Refusing test: ${key} must not reuse production credentials or identity.`);
+      }
+    }
+    if (production.MYSQL_HOST === testEnv.MYSQL_HOST && Number(production.MYSQL_PORT || 3306) === Number(testEnv.MYSQL_PORT)) {
+      throw new Error("Refusing test: database endpoint must be isolated from the configured production endpoint.");
     }
   }
-  // Apply the exact validated snapshot, not a second potentially changed read.
+  const allowedKeys = new Set(["MYSQL_HOST", "MYSQL_PORT", "MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_DATABASE", "MYSQL_SSL", "MYSQL_SSL_CA", "MEDIA_PROVIDER", "MEDIA_STORAGE_PREFIX", "CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"]);
+  for (const [key] of values) if (!allowedKeys.has(key)) throw new Error(`Refusing test: unsupported variable ${key} in the test file.`);
+  // Do not retain inherited CA/socket/provider/SMTP/auth configuration, including
+  // keys that the current implementation does not use but a future SDK might.
+  for (const key of Object.keys(process.env)) {
+    if (/^(?:MYSQL_|MEDIA_|CLOUDINARY_|SMTP_|CONTACT_|SESSION_|AUDIT_|TRUSTED_PROXY_)/.test(key)) delete process.env[key];
+  }
   for (const [key, value] of values) process.env[key] = value;
 }
 
