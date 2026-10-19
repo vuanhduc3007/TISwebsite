@@ -8,14 +8,18 @@ import { isApprovedProductionDatabase } from "./production-database-targets.mjs"
 loadEnvLocal();
 const env = process.env;
 function valid(fn) { try { fn(); return true; } catch { return false; } }
-const loopback = ["localhost", "127.0.0.1", "::1"].includes(env.MYSQL_HOST?.trim());
+const mysqlHost = env.MYSQL_HOST?.trim().toLowerCase() ?? "";
+const mysqlUsesApprovedPrivateNetwork = env.MYSQL_TRUSTED_PRIVATE_NETWORK === "true"
+  && /^vays-db-[a-z0-9]+-mysql-3306$/.test(mysqlHost);
 const port = Number(env.MYSQL_PORT ?? 3306);
 const checks = {
   databaseTarget: isApprovedProductionDatabase(env.MYSQL_DATABASE),
   mysqlConnectionVariables: ["MYSQL_HOST", "MYSQL_USER", "MYSQL_PASSWORD"].every(key => Boolean(env[key]?.trim())),
   mysqlPort: Number.isInteger(port) && port >= 1 && port <= 65535,
   mysqlNonRootUser: Boolean(env.MYSQL_USER?.trim()) && env.MYSQL_USER.trim().toLowerCase() !== "root",
-  mysqlRemoteTls: loopback || env.MYSQL_SSL === "true",
+  mysqlTransport: ["localhost", "127.0.0.1", "::1"].includes(mysqlHost)
+    || env.MYSQL_SSL === "true"
+    || mysqlUsesApprovedPrivateNetwork,
   mysqlRuntimeGuard: valid(() => getDatabaseConnectionOptions({ ...env, NODE_ENV: "production" })),
   sessionSecret: (env.SESSION_SECRET?.trim().length ?? 0) >= 32,
   auditSecret: (env.AUDIT_HASH_SECRET?.trim().length ?? 0) >= 32,

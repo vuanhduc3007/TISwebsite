@@ -11,6 +11,8 @@ export class DatabaseConfigurationError extends Error {
 
 let pool: Pool | undefined;
 
+const VIBE_HOST_PRIVATE_DATABASE = /^vays-db-[a-z0-9]+-mysql-3306$/;
+
 function getRequiredEnv(env: NodeJS.ProcessEnv, name: string) {
   const value = env[name]?.trim();
   if (!value) {
@@ -28,6 +30,7 @@ export function getDatabaseConnectionOptions(env: NodeJS.ProcessEnv) {
   const database = getRequiredEnv(env, "MYSQL_DATABASE");
   const parsedPort = Number(env.MYSQL_PORT ?? "3306");
   const useTls = env.MYSQL_SSL === "true";
+  const useTrustedPrivateNetwork = env.MYSQL_TRUSTED_PRIVATE_NETWORK === "true";
   const sslCa = env.MYSQL_SSL_CA?.replaceAll("\\n", "\n").trim();
 
   if (!Number.isInteger(parsedPort) || parsedPort < 1 || parsedPort > 65535) {
@@ -36,6 +39,13 @@ export function getDatabaseConnectionOptions(env: NodeJS.ProcessEnv) {
   if (env.MYSQL_SSL !== undefined && !["true", "false"].includes(env.MYSQL_SSL)) {
     throw new DatabaseConfigurationError("MYSQL_SSL must be true or false.");
   }
+  if (env.MYSQL_TRUSTED_PRIVATE_NETWORK !== undefined
+    && !["true", "false"].includes(env.MYSQL_TRUSTED_PRIVATE_NETWORK)) {
+    throw new DatabaseConfigurationError("MYSQL_TRUSTED_PRIVATE_NETWORK must be true or false.");
+  }
+  if (!useTls && sslCa) {
+    throw new DatabaseConfigurationError("MYSQL_SSL_CA requires MYSQL_SSL=true.");
+  }
   if (/[\s/\\@\0]/.test(host) || [user, database].some(value => /[\0\r\n]/.test(value))) {
     throw new DatabaseConfigurationError("MySQL connection configuration is invalid.");
   }
@@ -43,8 +53,11 @@ export function getDatabaseConnectionOptions(env: NodeJS.ProcessEnv) {
     if (user.toLowerCase() === "root" || !password.trim()) {
       throw new DatabaseConfigurationError("Production requires a non-root database user and password.");
     }
-    if (!["localhost", "127.0.0.1", "::1"].includes(host.toLowerCase()) && !useTls) {
-      throw new DatabaseConfigurationError("Production remote MySQL requires verified TLS.");
+    const isLoopback = ["localhost", "127.0.0.1", "::1"].includes(host.toLowerCase());
+    const isApprovedVibeHostPrivateTarget = useTrustedPrivateNetwork
+      && VIBE_HOST_PRIVATE_DATABASE.test(host.toLowerCase());
+    if (!isLoopback && !useTls && !isApprovedVibeHostPrivateTarget) {
+      throw new DatabaseConfigurationError("Production remote MySQL requires verified TLS or an approved private-network target.");
     }
   }
 

@@ -22,9 +22,20 @@ test("production database rejects root and missing credentials before creating a
 
 test("remote production database requires verified TLS", () => {
   const remote = { ...database, MYSQL_HOST: "db.example.test" };
-  assert.throws(() => getDatabaseConnectionOptions(remote), /requires verified TLS/);
+  assert.throws(() => getDatabaseConnectionOptions(remote), /requires verified TLS or an approved private-network target/);
   const options = getDatabaseConnectionOptions({ ...remote, MYSQL_SSL: "true" });
   assert.equal(options.ssl.rejectUnauthorized, true);
+});
+
+test("Vibe Host plaintext is allowed only for its exact private service target and explicit opt-in", () => {
+  const privateTarget = { ...database, MYSQL_HOST: "vays-db-190f951b-mysql-3306" };
+  assert.throws(() => getDatabaseConnectionOptions(privateTarget), /approved private-network target/);
+  assert.equal(getDatabaseConnectionOptions({ ...privateTarget, MYSQL_TRUSTED_PRIVATE_NETWORK: "true" }).host, privateTarget.MYSQL_HOST);
+  for (const host of ["db.example.test", "vays-db-190f951b-mysql-3306.example.test", "vays-db-../../mysql-3306"]) {
+    assert.throws(() => getDatabaseConnectionOptions({ ...privateTarget, MYSQL_HOST: host, MYSQL_TRUSTED_PRIVATE_NETWORK: "true" }));
+  }
+  assert.throws(() => getDatabaseConnectionOptions({ ...privateTarget, MYSQL_TRUSTED_PRIVATE_NETWORK: "yes" }));
+  assert.throws(() => getDatabaseConnectionOptions({ ...privateTarget, MYSQL_SSL_CA: "fixture-ca" }), /requires MYSQL_SSL=true/);
 });
 
 test("production SMTP requires a configured sender and recipient", () => {

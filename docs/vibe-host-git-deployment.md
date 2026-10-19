@@ -28,36 +28,40 @@ assumptions with Vibe Host settings.
 ## Runtime configuration and service contracts
 
 Keep real secrets in the host's protected environment settings, never in Git,
-build logs, screenshots or chat. Use an independently provisioned non-root MySQL
-identity and separate deployment/migration identity. Vibe Host provisioned the
-database as `tissolar_mysql`; the production config gate and guarded owner
-recovery accept that exact name alongside the existing VPS target `solar_shop`.
-This source change does not import or verify production data. If MySQL is reached
-across a network, `MYSQL_SSL=true` with verified certificate is required.
-Confirm the provider's MySQL connectivity, grants, storage and backup/restore
-process. Vibe Host shows the new MySQL 8.4 service online with internal port
-3306. The dashboard's 0 MB display does not prove the schema or data state.
-Its UI warns that scheduled backup excludes the database until it is linked
-to a website. The external-connection control offers an IP allowlist, but the
-observed empty list permits any Internet source and the UI explicitly warns
-that this connection is not encrypted. It was toggled open while inspecting
-the UI; closure still needs confirmation. Keep external access off. No Vibe
-Host v2 import control or encrypted external transport has been verified.
+build logs, screenshots or chat. Vibe Host linked the website to the MySQL 8.0
+database `cong_ty_co_phan_thuong_mai_va_dich_vu_ti` on the private service
+`vays-db-190f951b-mysql-3306:3306`. On 2026-10-19 the schema and selected content
+were imported through a temporary IP-restricted Adminer service, then verified
+as 4 categories, 157 products, 8 projects, 18 project images and one applied
+admin migration. Admin users, sessions, audit logs and rate-limit rows were
+intentionally not copied. Create a new owner after runtime connectivity works.
+
+For this exact managed private service set `MYSQL_SSL=false` and
+`MYSQL_TRUSTED_PRIVATE_NETWORK=true`. The runtime accepts plaintext only for an
+exact `vays-db-*-mysql-3306` internal hostname with this explicit opt-in; public
+or other remote targets still require `MYSQL_SSL=true` and certificate
+verification. Keep the database's external connection disabled. The separately
+created `tissolar_mysql` database remains a temporary rollback resource until
+the linked database, website and first backup have been verified; remove it
+after that checkpoint.
 
 Production also requires new distinct `SESSION_SECRET` and
 `AUDIT_HASH_SECRET` values with documented rotation after the earlier exposure,
 the correct production Cloudinary account/namespace, and real SMTP host,
 authentication, verified sender (`SMTP_FROM`) and recipient (`CONTACT_EMAIL`).
-The user's last checkpoint reported that the DB identity, SMTP details and
-rotation evidence are absent: these remain **BLOCKED**. No temporary or fake
-value may satisfy the config gate.
+The linked database identity is now known; SMTP details, Cloudinary production
+credentials and secret-rotation evidence remain **BLOCKED**. No temporary or
+fake value may satisfy the config gate.
 
-The app validates `TRUSTED_PROXY_IP_HEADER` and `TRUSTED_PROXY_SECRET` for
-admin/contact rate limits. Get a written provider contract for the inbound
-proxy: it must overwrite the client IP and private token headers, prevent
-direct-origin bypass, and supply the real visitor IP. Validate spoofed and
-chained headers in an approved staging environment. A managed proxy with no
-custom header support needs an application/proxy design change before go-live.
+The app validates the client address used for admin/contact rate limits. Vibe
+Host support confirmed that its managed ingress forwards the visitor address
+in `X-Real-IP` but cannot add `X-TIS-Proxy-Token`. Set
+`TRUSTED_PROXY_MODE=vibe-host`, `TRUSTED_PROXY_IP_HEADER=x-real-ip`, and remove
+`TRUSTED_PROXY_SECRET` for this deployment. This mode rejects missing, chained,
+malformed and alternate IP headers and is valid only while the container has no
+direct public-origin path. Validate header overwrite behavior with a staging
+rate-limit test before attaching the production domain. Other deployments keep
+`TRUSTED_PROXY_MODE=token` and a distinct 32-256 character proxy secret.
 Review TLS, canonical domain, cache bypass for admin/API/auth, resource limits,
 logs, alerts and backups on this platform. Enable HSTS only after HTTPS and
 subdomain behavior are accepted.

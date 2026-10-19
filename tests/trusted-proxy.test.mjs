@@ -14,6 +14,19 @@ test("production fails closed for missing/invalid proxy configuration", () => {
   }
 });
 
+test("Vibe Host mode accepts only one canonical X-Real-IP value without a custom token", () => {
+  const vibeHost = {
+    NODE_ENV: "production",
+    TRUSTED_PROXY_MODE: "vibe-host",
+    TRUSTED_PROXY_IP_HEADER: "x-real-ip"
+  };
+  assert.equal(resolveTrustedClientIp(new Headers({ "x-real-ip": "203.0.113.4" }), vibeHost), "203.0.113.4");
+  assert.throws(() => resolveTrustedClientIp(new Headers({ "x-real-ip": "203.0.113.4, 198.51.100.9" }), vibeHost), { status: 403 });
+  assert.throws(() => resolveTrustedClientIp(new Headers({ "x-forwarded-for": "203.0.113.4" }), vibeHost), { status: 403 });
+  assert.throws(() => resolveTrustedClientIp(new Headers({ "x-real-ip": "203.0.113.4" }), { ...vibeHost, TRUSTED_PROXY_IP_HEADER: "x-forwarded-for" }), { status: 503 });
+  assert.throws(() => resolveTrustedClientIp(new Headers({ "x-real-ip": "203.0.113.4" }), { ...vibeHost, TRUSTED_PROXY_SECRET: env.TRUSTED_PROXY_SECRET }), { status: 503 });
+});
+
 test("direct requests and forged/duplicated proxy tokens cannot spoof the rate-limit IP", () => {
   for (const token of ["", "forged", env.TRUSTED_PROXY_SECRET + ", " + env.TRUSTED_PROXY_SECRET, "x".repeat(257)]) {
     assert.throws(() => resolveTrustedClientIp(headers("198.51.100.9", token), env), { status: 403 });

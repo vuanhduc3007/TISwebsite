@@ -15,13 +15,25 @@ export class TrustedProxyError extends Error {
 }
 
 export function validateTrustedProxyConfiguration(env: Environment) {
+  const mode = env.TRUSTED_PROXY_MODE?.trim().toLowerCase() || "token";
   const header = env.TRUSTED_PROXY_IP_HEADER?.trim().toLowerCase();
   const secret = env.TRUSTED_PROXY_SECRET?.trim();
-  if (!header || !["x-real-ip", "x-forwarded-for", "cf-connecting-ip"].includes(header)
+
+  if (mode === "vibe-host") {
+    // Vibe Host v2 supplies the visitor address through X-Real-IP but cannot
+    // inject a deployment-specific authentication header. This explicit mode
+    // is limited to that single header and must only be enabled behind Vibe
+    // Host's managed ingress (no direct container/origin exposure).
+    if (header !== "x-real-ip" || secret) throw new TrustedProxyError(503);
+    return { mode, header } as const;
+  }
+
+  if (mode !== "token" || !header
+    || !["x-real-ip", "x-forwarded-for", "cf-connecting-ip"].includes(header)
     || !secret || secret.length < 32 || secret.length > 256) {
     throw new TrustedProxyError(503);
   }
-  return { header, secret };
+  return { mode, header, secret } as const;
 }
 
 function normalizeIp(raw: string) {
@@ -44,13 +56,15 @@ export function resolveTrustedClientIp(requestHeaders: RequestHeaders, env: Envi
     // Local development has no authenticated proxy. Never trust spoofed headers.
     return "development";
   }
-  const { header, secret } = validateTrustedProxyConfiguration(env);
-  const supplied = requestHeaders.get("x-tis-proxy-token") ?? "";
-  if (!supplied || supplied.length > 256
-    || !timingSafeEqual(createHash("sha256").update(supplied).digest(), createHash("sha256").update(secret).digest())) {
-    throw new TrustedProxyError(403);
+  const configuration = validateTrustedProxyConfiguration(env);
+  if (configuration.mode === "token") {
+    const supplied = requestHeaders.get("x-tis-proxy-token") ?? "";
+    if (!supplied || supplied.length > 256
+      || !timingSafeEqual(createHash("sha256").update(supplied).digest(), createHash("sha256").update(configuration.secret).digest())) {
+      throw new TrustedProxyError(403);
+    }
   }
-  const raw = requestHeaders.get(header)?.trim();
+  const raw = requestHeaders.get(configuration.header)?.trim();
   if (!raw) throw new TrustedProxyError(403);
   return normalizeIp(raw);
 }
