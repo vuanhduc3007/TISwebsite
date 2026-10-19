@@ -36,11 +36,13 @@ This source change does not import or verify production data. If MySQL is reache
 across a network, `MYSQL_SSL=true` with verified certificate is required.
 Confirm the provider's MySQL connectivity, grants, storage and backup/restore
 process. Vibe Host shows the new MySQL 8.4 service online with internal port
-3306 and external access disabled. The dashboard's 0 MB display does not prove
-the schema or data state. Its UI warns that scheduled backup excludes the
-database until it is linked to a website. No Vibe Host v2 import control or
-IP-allowlist/TLS control has been verified; keep external access disabled while
-the supported migration method is established.
+3306. The dashboard's 0 MB display does not prove the schema or data state.
+Its UI warns that scheduled backup excludes the database until it is linked
+to a website. The external-connection control offers an IP allowlist, but the
+observed empty list permits any Internet source and the UI explicitly warns
+that this connection is not encrypted. It was toggled open while inspecting
+the UI; closure still needs confirmation. Keep external access off. No Vibe
+Host v2 import control or encrypted external transport has been verified.
 
 Production also requires new distinct `SESSION_SECRET` and
 `AUDIT_HASH_SECRET` values with documented rotation after the earlier exposure,
