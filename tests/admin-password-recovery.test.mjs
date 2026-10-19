@@ -79,6 +79,22 @@ test("wrong database target refuses before opening a connection", async () => {
   assert.equal(opened, false);
 });
 
+test("Vibe Host target requires its own exact confirmation and connected database", async () => {
+  const env = { ...baseEnv, MYSQL_DATABASE: "tissolar_mysql" };
+  let opened = false;
+  await assert.rejects(recoverOwnerPassword({ env, openConnection: async () => { opened = true; }, hashPassword }), { code: "CONFIRMATION" });
+  assert.equal(opened, false);
+
+  env.CONFIRM_ADMIN_PASSWORD_RESET = "tissolar_mysql";
+  const wrongConnection = new FakeConnection({ database: "solar_shop" });
+  await assert.rejects(run(wrongConnection, env), { code: "CONNECTED_DB_TARGET" });
+  assert.equal(wrongConnection.committed, false);
+
+  const correctConnection = new FakeConnection({ database: "tissolar_mysql" });
+  await run(correctConnection, env);
+  assert.equal(correctConnection.committed, true);
+});
+
 test("connection to another database is rejected read-only", async () => {
   const connection = new FakeConnection({ database: "other_database" });
   await assert.rejects(run(connection), { code: "CONNECTED_DB_TARGET" });

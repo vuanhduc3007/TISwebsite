@@ -1,4 +1,5 @@
 import { MIGRATION_VERSION } from "./admin-db-utils.mjs";
+import { isApprovedProductionDatabase } from "./production-database-targets.mjs";
 
 export class RecoveryRefusal extends Error {
   constructor(code) {
@@ -13,11 +14,10 @@ export function recoveryFailureMessage(error) {
   return `Owner recovery not completed (${code}).`;
 }
 
-const TARGET_DATABASE = "solar_shop";
-
 export function validateRecoveryEnvironment(env) {
-  if (env.MYSQL_DATABASE?.trim() !== TARGET_DATABASE) throw new RecoveryRefusal("DB_TARGET");
-  if (env.CONFIRM_ADMIN_PASSWORD_RESET !== TARGET_DATABASE) throw new RecoveryRefusal("CONFIRMATION");
+  const targetDatabase = env.MYSQL_DATABASE?.trim();
+  if (!isApprovedProductionDatabase(targetDatabase)) throw new RecoveryRefusal("DB_TARGET");
+  if (env.CONFIRM_ADMIN_PASSWORD_RESET !== targetDatabase) throw new RecoveryRefusal("CONFIRMATION");
 
   const email = (env.ADMIN_EMAIL ?? "").trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 191) {
@@ -25,16 +25,16 @@ export function validateRecoveryEnvironment(env) {
   }
   const password = env.ADMIN_RECOVERY_PASSWORD ?? "";
   if (password.length < 12 || password.length > 256) throw new RecoveryRefusal("NEW_PASSWORD");
-  return { email, password };
+  return { email, password, targetDatabase };
 }
 
 export async function recoverOwnerPassword({ env, openConnection, hashPassword }) {
-  const { email, password } = validateRecoveryEnvironment(env);
+  const { email, password, targetDatabase } = validateRecoveryEnvironment(env);
   const connection = await openConnection();
   let inTransaction = false;
   try {
     const [databaseRows] = await connection.query("SELECT DATABASE() AS database_name");
-    if (databaseRows.length !== 1 || databaseRows[0].database_name !== TARGET_DATABASE) {
+    if (databaseRows.length !== 1 || databaseRows[0].database_name !== targetDatabase) {
       throw new RecoveryRefusal("CONNECTED_DB_TARGET");
     }
     const [migrationRows] = await connection.execute(

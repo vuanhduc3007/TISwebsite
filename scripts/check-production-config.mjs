@@ -2,6 +2,7 @@ import { loadEnvLocal } from "./admin-db-utils.mjs";
 import { validateTrustedProxyConfiguration } from "../src/lib/admin/client-ip.ts";
 import { getSmtpConfiguration } from "../src/lib/smtp-config.ts";
 import { getDatabaseConnectionOptions } from "../src/lib/db.ts";
+import { isApprovedProductionDatabase } from "./production-database-targets.mjs";
 
 // Offline only: NO database, SMTP or Cloudinary connection, and no writes.
 loadEnvLocal();
@@ -10,7 +11,7 @@ function valid(fn) { try { fn(); return true; } catch { return false; } }
 const loopback = ["localhost", "127.0.0.1", "::1"].includes(env.MYSQL_HOST?.trim());
 const port = Number(env.MYSQL_PORT ?? 3306);
 const checks = {
-  databaseTarget: env.MYSQL_DATABASE === "solar_shop",
+  databaseTarget: isApprovedProductionDatabase(env.MYSQL_DATABASE),
   mysqlConnectionVariables: ["MYSQL_HOST", "MYSQL_USER", "MYSQL_PASSWORD"].every(key => Boolean(env[key]?.trim())),
   mysqlPort: Number.isInteger(port) && port >= 1 && port <= 65535,
   mysqlNonRootUser: Boolean(env.MYSQL_USER?.trim()) && env.MYSQL_USER.trim().toLowerCase() !== "root",

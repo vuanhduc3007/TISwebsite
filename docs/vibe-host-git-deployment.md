@@ -29,12 +29,18 @@ assumptions with Vibe Host settings.
 
 Keep real secrets in the host's protected environment settings, never in Git,
 build logs, screenshots or chat. Use an independently provisioned non-root MySQL
-identity and separate deployment/migration identity. The database name in the
-current production config gate is `solar_shop`; if the host assigns a different
-name, review schema and gate changes before deployment. If MySQL is reached
+identity and separate deployment/migration identity. Vibe Host provisioned the
+database as `tissolar_mysql`; the production config gate and guarded owner
+recovery accept that exact name alongside the existing VPS target `solar_shop`.
+This source change does not import or verify production data. If MySQL is reached
 across a network, `MYSQL_SSL=true` with verified certificate is required.
 Confirm the provider's MySQL connectivity, grants, storage and backup/restore
-process; the dashboard showing zero databases does not establish any of them.
+process. Vibe Host shows the new MySQL 8.4 service online with internal port
+3306 and external access disabled. The dashboard's 0 MB display does not prove
+the schema or data state. Its UI warns that scheduled backup excludes the
+database until it is linked to a website. No Vibe Host v2 import control or
+IP-allowlist/TLS control has been verified; keep external access disabled while
+the supported migration method is established.
 
 Production also requires new distinct `SESSION_SECRET` and
 `AUDIT_HASH_SECRET` values with documented rotation after the earlier exposure,
