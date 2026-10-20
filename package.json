@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "npm run admin:create && next start",
+    "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "node --conditions=react-server --experimental-strip-types --test tests/*.test.mjs",
     "test:hardening-smoke": "node scripts/hardening-smoke.mjs",
