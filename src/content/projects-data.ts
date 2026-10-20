@@ -94,14 +94,6 @@ export const featuredProjects: FeaturedProject[] = [
       "/images/projects/nga_tu_dau/3.jpg",
       "/images/projects/nga_tu_dau/4.jpg"
     ]
-  },
-  {
-    name: "Điện mặt trời mái nhà - Khu thể thao giải trí",
-    client: "Công ty CP TM 89 Long Hải, Thuận Thành",
-    location: "Bắc Ninh",
-    date: "22/08/2025",
-    value: "1.200.000.000 VNĐ",
-    valueNumber: 1200000000,
-    pillar: "renewable"
   }
 ];
+
