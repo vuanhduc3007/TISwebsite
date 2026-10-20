@@ -337,15 +337,16 @@ INSERT INTO products (id, slug, category_id, name, price, price_amount, price_la
 -- PROJECTS SEED (Dữ liệu dự án)
 -- ============================================================
 
-INSERT INTO projects (id, name, client, pillar, location, contract_value_vnd, contract_date, date_display, is_highlight, sort_order) VALUES
-(1, 'Hệ thống camera an ninh khuôn viên', 'Trường Đại học Y tế Công cộng', 'it', 'Hà Nội', 804491604, '2017-10-19', NULL, 0, 10),
-(2, 'Hệ thống mạng, thoại và âm thanh', 'Tòa nhà AZ Lâm Viên, 107 Nguyễn Phong Sắc', 'it', 'Hà Nội', 908106000, '2020-05-22', NULL, 0, 20),
-(3, 'Trang bị thiết bị một cửa điện tử', 'Các xã thuộc huyện Bắc Hà, Si Ma Cai, Mường Khương, Bát Xát', 'it', 'Lào Cai', 22186327987, '2023-10-12', NULL, 0, 30),
-(4, 'Hệ thống cơ điện M&E và Điều hòa trung tâm HVAC', 'Tòa nhà Văn phòng & Thương mại Hàng Bài', 'me', 'Hà Nội', 4500000000, '2024-12-15', NULL, 0, 35),
-(5, 'Điện mặt trời mái nhà - Hợp tác đầu tư', 'Ban Quản lý Chợ Kim Tân', 'renewable', 'Lào Cai', 500000000, NULL, '04/2025', 0, 40),
-(6, 'Điện mặt trời mái nhà - Tự sản tự tiêu', 'Công ty TNHH TM Tổng hợp Tuấn Phương, BQL Chợ Thuận Thành', 'renewable', 'Bắc Ninh', 2750000000, NULL, '05/2025', 0, 50),
-(7, 'Điện mặt trời mái nhà - Hợp tác đầu tư', 'Công ty CP TM 69 Tuấn Hải, BQL Chợ đầu mối Ngã Tư Dâu', 'renewable', 'Bắc Ninh', 1800000000, NULL, '04/08/2025', 0, 60),
-(8, 'Điện mặt trời mái nhà - Khu thể thao giải trí', 'Công ty CP TM 89 Long Hải, Thuận Thành', 'renewable', 'Bắc Ninh', 1200000000, NULL, '22/08/2025', 0, 70);
+INSERT INTO projects (id, name, client, pillar, location, contract_value_vnd, contract_date, date_display, is_highlight, sort_order, status) VALUES
+(1, 'Hệ thống camera an ninh khuôn viên', 'Trường Đại học Y tế Công cộng', 'it', 'Hà Nội', 804491604, '2017-10-19', NULL, 0, 10, 'published'),
+(2, 'Hệ thống mạng, thoại và âm thanh', 'Tòa nhà AZ Lâm Viên, 107 Nguyễn Phong Sắc', 'it', 'Hà Nội', 908106000, '2020-05-22', NULL, 0, 20, 'published'),
+(3, 'Trang bị thiết bị một cửa điện tử', 'Các xã thuộc huyện Bắc Hà, Si Ma Cai, Mường Khương, Bát Xát', 'it', 'Lào Cai', 22186327987, '2023-10-12', NULL, 0, 30, 'published'),
+(4, 'Hệ thống cơ điện M&E và Điều hòa trung tâm HVAC', 'Tòa nhà Văn phòng & Thương mại Hàng Bài', 'me', 'Hà Nội', 4500000000, '2024-12-15', NULL, 0, 35, 'published'),
+(5, 'Điện mặt trời mái nhà - Hợp tác đầu tư', 'Ban Quản lý Chợ Kim Tân', 'renewable', 'Lào Cai', 500000000, NULL, '04/2025', 0, 40, 'published'),
+(6, 'Điện mặt trời mái nhà - Tự sản tự tiêu', 'Công ty TNHH TM Tổng hợp Tuấn Phương, BQL Chợ Thuận Thành', 'renewable', 'Bắc Ninh', 2750000000, NULL, '05/2025', 0, 50, 'published'),
+(7, 'Điện mặt trời mái nhà - Hợp tác đầu tư', 'Công ty CP TM 69 Tuấn Hải, BQL Chợ đầu mối Ngã Tư Dâu', 'renewable', 'Bắc Ninh', 1800000000, NULL, '04/08/2025', 0, 60, 'published'),
+-- Dự án Long Hải ẩn trên website (status = 'draft')
+(8, 'Điện mặt trời mái nhà - Khu thể thao giải trí', 'Công ty CP TM 89 Long Hải, Thuận Thành', 'renewable', 'Bắc Ninh', 1200000000, NULL, '22/08/2025', 0, 70, 'draft');
 
 -- Project Images Seed
 INSERT INTO project_images (project_id, image_url, caption, sort_order) VALUES
