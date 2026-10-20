@@ -1,10 +1,36 @@
-# Vibe Host Git deployment checkpoint
+# Vibe Host Git deployment record
 
-The customer selected Vibe Host Basic as the intended host. This document is a
-setup and acceptance checklist, not evidence that the service is deployed or
-production ready. The older VPS/systemd/Nginx runbooks apply only if a VPS is
-chosen instead. Do not combine their `/srv/tiscms` paths or localhost MySQL
-assumptions with Vibe Host settings.
+The customer selected Vibe Host Basic. The application is deployed from
+`main`, and the acceptance evidence below was collected against Vibe Host
+version 6 on 2026-10-20. The older VPS/systemd/Nginx runbooks apply only if a
+VPS is chosen instead. Do not combine their `/srv/tiscms` paths or localhost
+MySQL assumptions with Vibe Host settings.
+
+## Verified production baseline — 2026-10-20
+
+- Canonical URL: `https://tissolar.vn`; `https://www.tissolar.vn` returns a 301
+  redirect to the canonical host and preserves the request path.
+- DNS and TLS are active for both hosts. The canonical response sends
+  `Strict-Transport-Security: max-age=31536000; includeSubDomains` after TLS was
+  verified on both names.
+- Vibe Host version 6 built, passed its health gate and is online from commit
+  `f5cf727` on `main`.
+- Public acceptance checks passed for `/`, `/products` and `/projects`. The
+  rendered product catalogue contains 157 unique product links.
+- The linked MySQL database contains 4 categories, 157 products, 8 projects,
+  18 project images and one admin schema migration.
+- A new owner was created through a one-time guarded endpoint. A real login on
+  the canonical host returned a secure production session and the authenticated
+  dashboard returned 200. The endpoint was then removed and now returns 404.
+- The 2026-10-20 automatic MySQL backup completed successfully. A downloaded
+  copy is stored outside Git under `TIS-private-transfer` with a recorded SHA-256.
+- Automatic Git deployment is enabled in Vibe Host but remains pending until
+  the generated GitHub webhook is added to the repository.
+
+Remaining launch work: provision the validated production Cloudinary variables,
+complete SMTP configuration, remove temporary bootstrap environment names,
+then delete the temporary Adminer website and the redundant `tissolar-mysql`
+database after the external backup is retained.
 
 ## Source and build
 
@@ -45,13 +71,12 @@ created `tissolar_mysql` database remains a temporary rollback resource until
 the linked database, website and first backup have been verified; remove it
 after that checkpoint.
 
-Production also requires new distinct `SESSION_SECRET` and
-`AUDIT_HASH_SECRET` values with documented rotation after the earlier exposure,
-the correct production Cloudinary account/namespace, and real SMTP host,
-authentication, verified sender (`SMTP_FROM`) and recipient (`CONTACT_EMAIL`).
-The linked database identity is now known; SMTP details, Cloudinary production
-credentials and secret-rotation evidence remain **BLOCKED**. No temporary or
-fake value may satisfy the config gate.
+Vibe Host now contains protected `SESSION_SECRET` and `AUDIT_HASH_SECRET`
+variables. The local production Cloudinary identity and namespace are distinct
+from the test account and passed a read-only authenticated API check, but its
+three credentials have not yet been transmitted to Vibe Host. Real SMTP host,
+authentication and a verified sender (`SMTP_FROM`) are also pending. No
+temporary or fake value may satisfy either service gate.
 
 The app validates the client address used for admin/contact rate limits. Vibe
 Host support confirmed that its managed ingress forwards the visitor address
@@ -67,20 +92,18 @@ logs, alerts and backups on this platform. Enable HSTS only after HTTPS and
 subdomain behavior are accepted.
 
 `npm run production:config-check` is an offline configuration gate, not a
-service test. Its current **BLOCKED** result is expected while real values are
-missing. Do not run production DB migrations, media cleanup, upload or email
-tests without the separate approvals in the readiness audit. The accepted
-production data baseline is **4 categories / 157 products / 8 projects / 18
-project images**, to be verified only with explicitly approved read-only DB
-access.
+service test. Its current **BLOCKED** result is expected until Cloudinary and
+SMTP are provisioned. Do not run production DB migrations, media cleanup,
+upload or email tests without the separate approvals in the readiness audit.
+The accepted production data baseline is **4 categories / 157 products / 8
+projects / 18 project images**.
 
 ## What a later Git push does
 
-Once the provider's Git integration, deploy branch and automatic deployment
-have been configured and tested, a push to `main` should trigger a new build
-and release. Confirm this in Vibe Host deployment history after each push; a
-successful push alone proves only that GitHub received the commit. Review and
-test each source change first. Schema changes, new environment variables,
-dependency failures and data migrations need their own steps. Keep a known-good
-release and a schema-compatible rollback plan. Public launch is a separate
-checkpoint after the production readiness blockers have been resolved.
+After the generated webhook is installed and its first delivery is accepted, a
+push to `main` should trigger a new build and release. Confirm this in Vibe Host
+deployment history after each push; a successful push alone proves only that
+GitHub received the commit. Review and test each source change first. Schema
+changes, new environment variables, dependency failures and data migrations
+need their own steps. Keep a known-good release and a schema-compatible
+rollback plan.
