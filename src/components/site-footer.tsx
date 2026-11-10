@@ -8,7 +8,7 @@ export function SiteFooter() {
       <div className="site-shell grid gap-8 md:grid-cols-[1.35fr_.65fr] md:items-start">
         <div>
           <Link className="brand" href="/" aria-label="TIS - Trang chủ">
-            <Image src="/brand/tis-logo-horizontal.png" alt="TIS" width={140} height={65} className="w-auto h-16 object-contain" />
+            <Image src="/brand/tis-logo-v2.png" alt="TIS" width={140} height={76} className="w-auto h-16 object-contain" />
           </Link>
           <p className="mt-4 max-w-md text-base leading-6 text-[var(--ink-muted)]">
             Công Ty Cổ Phần Thương Mại Và Dịch Vụ Tin Học Viễn Thông TIS
@@ -26,7 +26,7 @@ export function SiteFooter() {
         </div>
         <div className="w-full h-[200px] md:h-[260px] rounded-xl overflow-hidden ring-1 ring-[var(--line)] shadow-sm hover:shadow-md transition-shadow">
           <iframe 
-            src="https://maps.google.com/maps?q=S%E1%BB%91%2022,%20ng%C3%B5%20318/80,%20ph%E1%BB%91%20Ng%E1%BB%8Dc%20Tr%C3%AC,%20ph%C6%B0%E1%BB%9Dng%20Long%20Bi%C3%AAn,%20H%C3%A0%20N%E1%BB%99i&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+            src="https://maps.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1zU-G7kSAyMiwgbmfDtSAzMTgvODAsIHBo4buRIE5n4buNYyBUcsOsLCBwaMaw4budbmcgTG9uZyBCacOqbiwgSMOgIE7hu5lp!6i15" 
             width="100%" 
             height="100%" 
             style={{ border: 0 }} 

@@ -89,6 +89,16 @@ function formatPrice(value: string | null) {
   return trimmed;
 }
 
+// Tạm thời ẩn giá cụ thể của các tấm pin mặt trời (chỉ hiển thị nhãn "Liên hệ")
+const HIDE_SOLAR_PANEL_PRICES = true;
+
+function isSolarPanelCategory(categoryId: number | null, categoryName: string | null): boolean {
+  if (categoryId === 1) return true;
+  if (!categoryName) return false;
+  const normalized = categoryName.toLowerCase();
+  return normalized.includes("tấm pin") || normalized.includes("tam-pin");
+}
+
 function mapProductRow(row: ProductRow): Product {
   const category = {
     id: row.category_id ?? 0,
@@ -111,9 +121,12 @@ function mapProductRow(row: ProductRow): Product {
 
   if (!Array.isArray(parsedSpecs)) parsedSpecs = [];
 
-  const price = row.price_amount !== null
+  const rawPrice = row.price_amount !== null
     ? formatPrice(String(row.price_amount))
     : row.price_label?.trim() || formatPrice(row.price);
+
+  const isSolarPanel = isSolarPanelCategory(row.category_id, row.category_name);
+  const price = HIDE_SOLAR_PANEL_PRICES && isSolarPanel ? "Liên hệ" : rawPrice;
   const description = row.description?.split(/\n\s*\n/).map((item) => item.trim()).filter(Boolean) ?? [];
 
   return {
